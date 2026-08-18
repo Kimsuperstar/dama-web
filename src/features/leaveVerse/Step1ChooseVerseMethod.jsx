@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { ChevronLeft, X, Search, Edit3, ArrowRight, Heart, Sparkles, BookOpen } from 'lucide-react';
 

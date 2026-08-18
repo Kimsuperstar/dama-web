@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { MoonVisual } from './MoonVisual';
-import { ChuseokCountdown } from './ChuseokCountdown';
+import { MoonVisual } from '../components/MoonVisual';
+import { ChuseokCountdown } from '../components/ChuseokCountdown';
 import { CHUSEOK_OPEN_AT } from '../constants/chuseok';
 import { 
   Sparkles, 
@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 
 /**
- * 담아(Dama) 비로그인 메인 랜딩 페이지 컴포넌트
+ * 담아(Dama) 비로그인 메인 랜딩 페이지 화면 (경로: /)
  */
 export function LandingPage({
   onOpenLogin,
@@ -58,83 +58,99 @@ export function LandingPage({
         <MoonVisual percentage={isChuseokPeriod ? 100 : 75} size="lg" glow={true} />
       </div>
 
-      {/* 2026 Chuseok Real-time Countdown Timer */}
-      <div className="w-full my-3">
-        <ChuseokCountdown 
-          isDevChuseokDay={isDevChuseokDay} 
-          onToggleDevChuseok={onToggleDevChuseok} 
-        />
+      {/* Countdown or Feast Status */}
+      <div className="mb-6 w-full max-w-xs">
+        <ChuseokCountdown isDevChuseokDay={isDevChuseokDay} onToggleDevChuseok={onToggleDevChuseok} />
       </div>
 
-      {/* Primary Landing CTAs */}
-      <div className="w-full space-y-2.5 my-3">
+      {/* Primary Action Buttons */}
+      <div className="w-full max-w-xs space-y-3 mb-8">
         <button
+          type="button"
           onClick={onOpenCreateMoon}
-          className="w-full h-14 bg-gradient-to-r from-[#6B4AA6] to-[#53318C] text-white rounded-full font-bold text-base sm:text-lg flex items-center justify-center gap-2 dama-button-shadow transition-all active:scale-[0.99] hover:opacity-95"
+          className="w-full h-14 bg-gradient-to-r from-[#6B4AA6] to-[#53318C] text-white rounded-full font-semibold text-base flex items-center justify-center gap-2 shadow-md hover:brightness-105 active:scale-[0.99] transition-all"
         >
           <Moon className="w-5 h-5 fill-white" />
           <span>내 보름달 만들기</span>
-          <ChevronRight className="w-5 h-5" />
         </button>
 
         <button
+          type="button"
           onClick={onExploreDemoMoon}
-          className="w-full h-12 bg-white hover:bg-[#FFF1C7]/30 border border-[#6B4AA6]/40 text-[#3F315F] rounded-full font-semibold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-2xs transition-all"
+          className="w-full h-12 bg-white/90 text-[#3F315F] border border-[#E8B7C8] rounded-full font-medium text-sm flex items-center justify-center gap-1.5 hover:bg-[#FFF1C7]/30 active:scale-[0.99] transition-all shadow-2xs"
         >
-          <Users className="w-4 h-4 text-[#6B4AA6]" />
+          <Sparkles className="w-4 h-4 text-[#6B4AA6]" />
           <span>예시 보름달 둘러보기</span>
         </button>
       </div>
 
-      {/* Service Key Features Grid */}
-      <div className="w-full grid grid-cols-1 sm:grid-cols-3 gap-2.5 my-4 text-left">
-        <div className="bg-white/90 rounded-2xl p-4 border border-[#E8B7C8]/70 dama-card-shadow">
-          <div className="w-8 h-8 rounded-full bg-[#FFF1C7] text-[#6B4AA6] flex items-center justify-center mb-2 font-bold text-sm">
-            🌕
+      {/* Feature Highlights Grid */}
+      <div className="w-full bg-white/80 rounded-[28px] p-6 border border-[#E8B7C8]/70 text-left dama-card-shadow mb-8 space-y-4">
+        <h3 className="font-bold text-[#3F315F] text-base flex items-center gap-2 mb-3">
+          <Sparkles className="w-4 h-4 text-[#6B4AA6]" />
+          <span>담아(Dama)는 이렇게 함께해요</span>
+        </h3>
+
+        {/* Highlight 1 */}
+        <div className="flex items-start gap-3">
+          <div className="w-8 h-8 rounded-full bg-[#EADDFF] text-[#6B4AA6] flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
+            <Users className="w-4 h-4" />
           </div>
-          <h3 className="font-bold text-xs text-[#3F315F] mb-1">말씀으로 차는 달</h3>
-          <p className="text-[11px] text-[#565B86] leading-tight break-keep">
-            지인들이 전해준 축복의 성경 구절로 보름달이 환하게 채워집니다.
-          </p>
+          <div>
+            <div className="font-bold text-xs sm:text-sm text-[#3F315F]">
+              회원가입 없이 3초 만에 말씀 전송
+            </div>
+            <p className="text-xs text-[#565B86] leading-relaxed">
+              링크를 받은 친구는 로그인 없이 축복과 위로의 성경 구절을 남길 수 있어요.
+            </p>
+          </div>
         </div>
 
-        <div className="bg-white/90 rounded-2xl p-4 border border-[#E8B7C8]/70 dama-card-shadow">
-          <div className="w-8 h-8 rounded-full bg-[#EADDFF] text-[#6B4AA6] flex items-center justify-center mb-2 font-bold text-sm">
-            🔒
+        {/* Highlight 2 */}
+        <div className="flex items-start gap-3">
+          <div className="w-8 h-8 rounded-full bg-[#FFF1C7] text-[#53318C] flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
+            <Moon className="w-4 h-4 fill-[#53318C]" />
           </div>
-          <h3 className="font-bold text-xs text-[#3F315F] mb-1">추석 당일 개봉</h3>
-          <p className="text-[11px] text-[#565B86] leading-tight break-keep">
-            정성껏 모인 비밀 말씀은 한가위 추석 00:00에 모두 열립니다.
-          </p>
+          <div>
+            <div className="font-bold text-xs sm:text-sm text-[#3F315F]">
+              말씀이 모일수록 차오르는 보름달
+            </div>
+            <p className="text-xs text-[#565B86] leading-relaxed">
+              15개의 말씀이 모이면 은혜 가득한 만월이 완성돼요.
+            </p>
+          </div>
         </div>
 
-        <div className="bg-white/90 rounded-2xl p-4 border border-[#E8B7C8]/70 dama-card-shadow">
-          <div className="w-8 h-8 rounded-full bg-[#FFF1C7] text-[#BA1A1A] flex items-center justify-center mb-2 font-bold text-sm">
-            💌
+        {/* Highlight 3 */}
+        <div className="flex items-start gap-3">
+          <div className="w-8 h-8 rounded-full bg-[#EADDFF] text-[#BA1A1A] flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
+            <Lock className="w-4 h-4" />
           </div>
-          <h3 className="font-bold text-xs text-[#3F315F] mb-1">간편한 링크 나눔</h3>
-          <p className="text-[11px] text-[#565B86] leading-tight break-keep">
-            회원가입 없이 누구나 링크 하나로 마음을 남길 수 있어요.
-          </p>
+          <div>
+            <div className="font-bold text-xs sm:text-sm text-[#3F315F]">
+              추석 당일 00:00에 열리는 감동
+            </div>
+            <p className="text-xs text-[#565B86] leading-relaxed">
+              도착한 말씀은 추석 당일 보관함이 열리며 소중한 선물처럼 확인할 수 있어요.
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* 3 Step Process */}
-      <div className="w-full bg-white/95 rounded-[28px] p-5 sm:p-6 border border-[#E8B7C8] dama-card-shadow my-4 text-left">
-        <h2 className="text-base sm:text-lg font-bold text-[#3F315F] text-center mb-5 font-display">
-          담아, 이렇게 시작해요
-        </h2>
-
+      {/* 3 Simple Steps */}
+      <div className="w-full mb-8">
+        <h3 className="font-bold text-sm text-[#3F315F] mb-4">
+          ✦ 간단한 이용 방법 ✦
+        </h3>
+        
         <div className="grid grid-cols-3 gap-2 text-center relative">
-          <div className="absolute top-4 left-[20%] right-[20%] h-[1px] border-t border-dashed border-[#6B4AA6]/30 -z-0" />
-
           {/* Step 1 */}
           <div className="flex flex-col items-center relative z-10">
             <div className="w-7 h-7 rounded-full bg-[#3F315F] text-white text-xs font-bold flex items-center justify-center mb-2 shadow-xs">
               1
             </div>
             <div className="w-9 h-9 rounded-full bg-[#FFF1C7] text-[#6B4AA6] flex items-center justify-center mb-1.5">
-              <Moon className="w-4 h-4 fill-current text-[#6B4AA6]" />
+              <Moon className="w-4 h-4 fill-[#6B4AA6]" />
             </div>
             <div className="font-bold text-xs text-[#3F315F] mb-1">보름달 만들기</div>
             <p className="text-[10px] text-[#565B86] leading-tight break-keep">

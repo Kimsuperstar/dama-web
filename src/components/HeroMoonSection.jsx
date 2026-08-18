@@ -65,7 +65,7 @@ export function HeroMoonSection({
   // 친구들에게 내 보름달 공유하기 버튼 클릭 시
   const handleShareMoon = () => {
     const moonId = moonData?.id || 'demo';
-    const shareUrl = `${window.location.origin}${window.location.pathname}?moon=${moonId}`;
+    const shareUrl = `${window.location.origin}/moon/${moonId}`;
     navigator.clipboard.writeText(shareUrl);
     triggerToast(
       '보름달 링크가 복사됐어요!',

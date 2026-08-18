@@ -39,7 +39,7 @@ import { DamaLogo } from './DamaLogo';
     };
 
     onCreateMoon(newMoon);
-    setCreatedUrl(`${window.location.origin}/?moon=${newMoon.id}`);
+    setCreatedUrl(`${window.location.origin}/moon/${newMoon.id}`);
   };
 
   const handleCopy = () => {
