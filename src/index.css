@@ -1,80 +1,98 @@
-.header {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+@import "tailwindcss";
 
-  padding: 20px 24px;
+@layer base {
+  :root {
+    --color-brand-deep-purple: #3F315F;
+    --color-brand-purple: #6B4AA6;
+    --color-chuseok-indigo: #41466F;
+    --color-dusk-pink: #E8B7C8;
+    --color-moonlight: #FFF1C7;
+    --color-warm-ivory: #FFF8EE;
+  }
+
+  body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+    color: #3F315F;
+    background-color: #FFF8EE;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: 'Gowun Dodum', 'Pretendard', sans-serif;
+  }
+
+  .font-serif-kr {
+    font-family: 'Gowun Batang', 'Noto Serif KR', serif;
+  }
 }
 
-.header__logo {
-  font-size: 24px;
-  font-weight: 700;
-  color: #3f315f;
+/* Animations */
+@keyframes pulseMoonGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 25px rgba(255, 241, 199, 0.7)) drop-shadow(0 0 50px rgba(107, 74, 166, 0.25));
+  }
+  50% {
+    filter: drop-shadow(0 0 40px rgba(255, 241, 199, 0.95)) drop-shadow(0 0 75px rgba(107, 74, 166, 0.45));
+  }
 }
 
-.header__actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+@keyframes floatGentle {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-7px); }
 }
 
-.header__login {
-  border: none;
+@keyframes twinkle {
+  0%, 100% { opacity: 0.25; transform: scale(0.85); }
+  50% { opacity: 0.95; transform: scale(1.15); }
+}
+
+.animate-moon-glow {
+  animation: pulseMoonGlow 5s infinite ease-in-out;
+}
+
+.animate-float {
+  animation: floatGentle 5s infinite ease-in-out;
+}
+
+.animate-twinkle-1 {
+  animation: twinkle 3s infinite ease-in-out;
+}
+
+.animate-twinkle-2 {
+  animation: twinkle 4.5s infinite ease-in-out 1.2s;
+}
+
+.animate-twinkle-3 {
+  animation: twinkle 2.5s infinite ease-in-out 0.6s;
+}
+
+/* Soft paper card & shadows */
+.dama-card-shadow {
+  box-shadow: 0 12px 36px -4px rgba(63, 49, 95, 0.08), 0 4px 12px -2px rgba(63, 49, 95, 0.04);
+}
+
+.dama-button-shadow {
+  box-shadow: 0 8px 24px -2px rgba(107, 74, 166, 0.35);
+}
+
+.dama-button-shadow:hover {
+  box-shadow: 0 12px 28px 0px rgba(107, 74, 166, 0.45);
+}
+
+/* Custom subtle scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
   background: transparent;
-
-  font-size: 14px;
-  font-weight: 600;
-  color: #3f315f;
-
-  cursor: pointer;
+}
+::-webkit-scrollbar-thumb {
+  background: #E8B7C8;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #6B4AA6;
 }
 
-.header__menu {
-  width: 40px;
-  height: 40px;
-
-  border: none;
-  border-radius: 50%;
-
-  background: #fff8ee;
-  color: #3f315f;
-
-  font-size: 20px;
-  cursor: pointer;
-}
-
-.primary-button {
-  width: 100%;
-  min-height: 56px;
-
-  border: none;
-  border-radius: 999px;
-
-  background-color: #6b4aa6;
-  color: white;
-
-  font-size: 16px;
-  font-weight: 700;
-
-  padding: 16px 24px;
-
-  cursor: pointer;
-
-  transition:
-    transform 0.2s ease,
-    opacity 0.2s ease;
-}
-
-.primary-button:hover {
-  opacity: 0.9;
-}
-
-.primary-button:active {
-  transform: scale(0.98);
-}
-
-.primary-button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
