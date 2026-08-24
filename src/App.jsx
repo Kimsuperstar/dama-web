@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  useNavigate,
+  useLocation,
+} from 'react-router-dom';
+
 import { Header } from './components/Header';
 import { LandingPage } from './pages/LandingPage';
 import { MoonPage } from './pages/MoonPage';
@@ -7,7 +14,11 @@ import { LoginPage } from './pages/LoginPage';
 import { CreateMoonModal } from './components/CreateMoonModal';
 import { LoginModal } from './components/LoginModal';
 import { DesignSystemReviewModal } from './components/DesignSystemReviewModal';
-import { INITIAL_MOCK_MESSAGES } from './data/verses';
+
+/**
+ * Spring Boot 서버 주소
+ */
+const API_BASE_URL = 'http://localhost:8080';
 
 /**
  * 라우팅 및 전역 레이아웃 컴포넌트
@@ -16,197 +27,420 @@ function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 로그인 및 인증 상태
+  // =========================================================
+  // 로그인 / 인증 상태
+  // =========================================================
+
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [authProvider, setAuthProvider] = useState(null); // 'developer' | 'kakao' | 'naver' | null
+  const [authProvider, setAuthProvider] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  // 처음 사용자 정보를 확인하기 전까지의 상태
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
+
   const [isDevChuseokDay, setIsDevChuseokDay] = useState(false);
 
+  // =========================================================
   // 모달 상태
+  // =========================================================
+
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [isCreateMoonModalOpen, setIsCreateMoonModalOpen] = useState(false);
+  const [isCreateMoonModalOpen, setIsCreateMoonModalOpen] =
+    useState(false);
   const [isDesignReviewOpen, setIsDesignReviewOpen] = useState(false);
 
-  // 구버전 쿼리스트링(?moon=...)이 URL에 남아있는 경우 /moon/:moonId 로 리다이렉트
+  // =========================================================
+  // React ↔ Spring Boot 연결 확인
+  // =========================================================
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/v1/health`, {
+      credentials: 'include',
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        return response.json();
+      })
+      .then((data) => {
+        console.log('Spring Boot 연결 성공:', data);
+      })
+      .catch((error) => {
+        console.error('Spring Boot 연결 실패:', error);
+      });
+  }, []);
+
+  // =========================================================
+  // 앱 시작 시 로그인 사용자 확인
+  // =========================================================
+
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/api/v1/users/me`,
+          {
+            method: 'GET',
+
+            // Spring Security 세션 쿠키를 함께 전송
+            credentials: 'include',
+          }
+        );
+
+        // 로그인하지 않은 사용자
+        if (response.status === 401) {
+          setIsLoggedIn(false);
+          setAuthProvider(null);
+          setCurrentUser(null);
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error(
+            `사용자 조회 실패: HTTP ${response.status}`
+          );
+        }
+
+        const user = await response.json();
+
+        console.log('현재 로그인 사용자:', user);
+
+        setCurrentUser(user);
+        setIsLoggedIn(true);
+        setAuthProvider(user.provider?.toLowerCase() ?? null);
+      } catch (error) {
+        console.error('로그인 상태 확인 실패:', error);
+
+        setIsLoggedIn(false);
+        setAuthProvider(null);
+        setCurrentUser(null);
+      } finally {
+        setIsAuthLoading(false);
+      }
+    };
+
+    checkLoginStatus();
+  }, []);
+
+  // =========================================================
+  // OAuth 로그인 성공 후 처리
+  // =========================================================
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+
+    const loginResult = params.get('login');
+
+    if (loginResult === 'success') {
+      // OAuth 로그인 후 Spring이
+      // http://localhost:5173/?login=success
+      // 로 돌려보냈을 경우
+
+      fetch(`${API_BASE_URL}/api/v1/users/me`, {
+        credentials: 'include',
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('로그인 사용자 조회 실패');
+          }
+
+          return response.json();
+        })
+        .then((user) => {
+          setCurrentUser(user);
+          setIsLoggedIn(true);
+          setAuthProvider(
+            user.provider?.toLowerCase() ?? null
+          );
+
+          setIsLoginModalOpen(false);
+
+          // 로그인 성공 후 보름달 생성 모달
+          setIsCreateMoonModalOpen(true);
+
+          // URL의 ?login=success 제거
+          navigate('/', { replace: true });
+        })
+        .catch((error) => {
+          console.error('OAuth 로그인 처리 실패:', error);
+        });
+    }
+  }, [location.search, navigate]);
+
+  // =========================================================
+  // 기존 ?moon=... 주소 호환
+  // =========================================================
+
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const queryMoon = params.get('moon');
-    if (queryMoon && !location.pathname.startsWith('/moon/')) {
-      navigate(`/moon/${queryMoon}`, { replace: true });
+
+    if (
+      queryMoon &&
+      !location.pathname.startsWith('/moon/')
+    ) {
+      navigate(`/moon/${queryMoon}`, {
+        replace: true,
+      });
     }
   }, [location, navigate]);
 
-  // 로그인 성공 핸들러
-  const handleLoginSuccess = (userInfo) => {
-    setIsLoggedIn(true);
-    setAuthProvider(userInfo?.provider || 'developer');
-    setIsLoginModalOpen(false);
+  // =========================================================
+  // OAuth 로그인 시작
+  // =========================================================
 
-    if (userInfo?.provider === 'developer') {
-      const devMoonId = 'moon-developer';
-      const storedMoons = localStorage.getItem('dama_all_moons');
-      let existingDevMoon = null;
-      if (storedMoons) {
-        try {
-          const parsed = JSON.parse(storedMoons);
-          existingDevMoon = parsed[devMoonId];
-        } catch {
-          // ignore
+  const handleOAuthLogin = (provider) => {
+    if (provider === 'kakao') {
+      window.location.href =
+        `${API_BASE_URL}/oauth2/authorization/kakao`;
+
+      return;
+    }
+
+    if (provider === 'naver') {
+      window.location.href =
+        `${API_BASE_URL}/oauth2/authorization/naver`;
+
+      return;
+    }
+
+    console.error('지원하지 않는 로그인 제공자:', provider);
+  };
+
+  // =========================================================
+  // 로그아웃
+  // =========================================================
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/logout`,
+        {
+          method: 'POST',
+          credentials: 'include',
         }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `로그아웃 실패: HTTP ${response.status}`
+        );
       }
 
-      const devMoon = existingDevMoon || {
-        id: devMoonId,
-        ownerName: '개발자',
-        targetCount: 15,
-        messages: INITIAL_MOCK_MESSAGES,
-        dDay: '추석까지 D-12',
-      };
+      setIsLoggedIn(false);
+      setAuthProvider(null);
+      setCurrentUser(null);
 
-      // 보존
-      const moonsMap = storedMoons ? JSON.parse(storedMoons) : {};
-      moonsMap[devMoon.id] = devMoon;
-      localStorage.setItem('dama_all_moons', JSON.stringify(moonsMap));
-      localStorage.setItem('dama_current_moon', JSON.stringify(devMoon));
-
-      navigate(`/moon/${devMoon.id}`);
-      setIsCreateMoonModalOpen(false);
-    } else {
-      // 일반 소셜 로그인(카카오/네이버) 시 보름달 생성 모달 열기
-      setIsCreateMoonModalOpen(true);
+      navigate('/');
+    } catch (error) {
+      console.error('로그아웃 실패:', error);
     }
   };
 
-  // 로그아웃
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setAuthProvider(null);
-    navigate('/');
-  };
+  // =========================================================
+  // 새 보름달 생성 요청
+  // =========================================================
 
-  // 새 보름달 생성 요청 (헤더 또는 랜딩페이지에서 호출)
   const handleRequestCreateMoon = () => {
     if (!isLoggedIn) {
       setIsLoginModalOpen(true);
-    } else {
-      setIsCreateMoonModalOpen(true);
+      return;
     }
+
+    setIsCreateMoonModalOpen(true);
   };
 
-  // 보름달 생성 완료 핸들러
+  // =========================================================
+  // 보름달 생성 완료
+  // =========================================================
+
   const handleCreateMoon = (newMoon) => {
-    setIsLoggedIn(true);
     setIsCreateMoonModalOpen(false);
+
     navigate(`/moon/${newMoon.id}`);
   };
 
-  // 현재 화면 판단 (헤더 도구 표시용)
-  const currentView = location.pathname === '/' ? 'landing' : 'hero';
+  // =========================================================
+  // 현재 화면
+  // =========================================================
+
+  const currentView =
+    location.pathname === '/' ? 'landing' : 'hero';
+
+  // 로그인 상태 확인 중
+  if (isAuthLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#FFF8EE] text-[#3F315F]">
+        로그인 상태 확인 중...
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#FFF8EE] text-[#3F315F] font-sans antialiased selection:bg-[#EADDFF] selection:text-[#3F315F] relative">
-      {/* Subtle Background Gradient & Atmosphere */}
+
+      {/* Background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
         <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-[#FFF1C7]/30 rounded-full blur-3xl" />
+
         <div className="absolute top-1/3 -right-32 w-[400px] h-[400px] bg-[#EADDFF]/25 rounded-full blur-3xl" />
+
         <div className="absolute bottom-10 -left-32 w-[400px] h-[400px] bg-[#E8B7C8]/20 rounded-full blur-3xl" />
       </div>
 
-      {/* Global Header */}
+      {/* Header */}
       <Header
         isLoggedIn={isLoggedIn}
         authProvider={authProvider}
+        currentUser={currentUser}
         currentView={currentView}
         isDevChuseokDay={isDevChuseokDay}
-        onToggleDevChuseok={() => setIsDevChuseokDay((prev) => !prev)}
-        onOpenLogin={() => setIsLoginModalOpen(true)}
+        onToggleDevChuseok={() =>
+          setIsDevChuseokDay((prev) => !prev)
+        }
+        onOpenLogin={() =>
+          setIsLoginModalOpen(true)
+        }
         onLogout={handleLogout}
         onOpenCreateMoon={handleRequestCreateMoon}
-        onOpenDesignReview={() => setIsDesignReviewOpen(true)}
+        onOpenDesignReview={() =>
+          setIsDesignReviewOpen(true)
+        }
         onGoHome={() => navigate('/')}
       />
 
-      {/* Main Routed Content */}
+      {/* Main */}
       <main className="w-full flex justify-center">
         <Routes>
-          {/* 1. 랜딩 페이지 */}
+
+          {/* 랜딩 */}
           <Route
             path="/"
             element={
               <LandingPage
-                onOpenLogin={() => setIsLoginModalOpen(true)}
-                onOpenCreateMoon={handleRequestCreateMoon}
-                onExploreDemoMoon={() => navigate('/moon/demo')}
-                isDevChuseokDay={isDevChuseokDay}
-                onToggleDevChuseok={() => setIsDevChuseokDay((prev) => !prev)}
+                isLoggedIn={isLoggedIn}
+                currentUser={currentUser}
+                onOpenLogin={() =>
+                  setIsLoginModalOpen(true)
+                }
+                onOpenCreateMoon={
+                  handleRequestCreateMoon
+                }
+                onExploreDemoMoon={() =>
+                  navigate('/moon/demo')
+                }
+                isDevChuseokDay={
+                  isDevChuseokDay
+                }
+                onToggleDevChuseok={() =>
+                  setIsDevChuseokDay(
+                    (prev) => !prev
+                  )
+                }
               />
             }
           />
 
-          {/* 2. 보름달 상세 및 말씀 남기기 페이지 */}
+          {/* 보름달 */}
           <Route
             path="/moon/:moonId"
             element={
               <MoonPage
                 isLoggedIn={isLoggedIn}
                 authProvider={authProvider}
+                currentUser={currentUser}
                 isDevChuseokDay={isDevChuseokDay}
-                onToggleDevChuseok={() => setIsDevChuseokDay((prev) => !prev)}
-                onLoginSuccess={handleLoginSuccess}
-                onOpenLoginModal={() => setIsLoginModalOpen(true)}
+
+                onOAuthLogin={handleOAuthLogin}
+
+                onToggleDevChuseok={() =>
+                  setIsDevChuseokDay((prev) => !prev)
+                }
+
+                onOpenLoginModal={() =>
+                  setIsLoginModalOpen(true)
+                }
+
                 onLogout={handleLogout}
               />
             }
           />
 
-          {/* 3. 독립 로그인 페이지 */}
+          {/* 로그인 페이지 */}
           <Route
             path="/login"
             element={
               <LoginPage
-                onLoginSuccess={handleLoginSuccess}
+                onOAuthLogin={
+                  handleOAuthLogin
+                }
               />
             }
           />
 
-          {/* Fallback Route */}
+          {/* 잘못된 URL */}
           <Route
             path="*"
             element={
               <LandingPage
-                onOpenLogin={() => setIsLoginModalOpen(true)}
-                onOpenCreateMoon={handleRequestCreateMoon}
-                onExploreDemoMoon={() => navigate('/moon/demo')}
-                isDevChuseokDay={isDevChuseokDay}
-                onToggleDevChuseok={() => setIsDevChuseokDay((prev) => !prev)}
+                isLoggedIn={isLoggedIn}
+                currentUser={currentUser}
+                onOpenLogin={() =>
+                  setIsLoginModalOpen(true)
+                }
+                onOpenCreateMoon={
+                  handleRequestCreateMoon
+                }
+                onExploreDemoMoon={() =>
+                  navigate('/moon/demo')
+                }
+                isDevChuseokDay={
+                  isDevChuseokDay
+                }
+                onToggleDevChuseok={() =>
+                  setIsDevChuseokDay(
+                    (prev) => !prev
+                  )
+                }
               />
             }
           />
         </Routes>
       </main>
 
-      {/* Modals */}
+      {/* 보름달 생성 */}
       <CreateMoonModal
         isOpen={isCreateMoonModalOpen}
-        onClose={() => setIsCreateMoonModalOpen(false)}
+        onClose={() =>
+          setIsCreateMoonModalOpen(false)
+        }
         onCreateMoon={handleCreateMoon}
       />
 
+      {/* 로그인 */}
       <LoginModal
         isOpen={isLoginModalOpen}
-        onClose={() => setIsLoginModalOpen(false)}
-        onLoginSuccess={handleLoginSuccess}
+        onClose={() =>
+          setIsLoginModalOpen(false)
+        }
+        onOAuthLogin={handleOAuthLogin}
       />
 
+      {/* 디자인 리뷰 */}
       <DesignSystemReviewModal
         isOpen={isDesignReviewOpen}
-        onClose={() => setIsDesignReviewOpen(false)}
+        onClose={() =>
+          setIsDesignReviewOpen(false)
+        }
       />
     </div>
   );
 }
 
 /**
- * 최상위 App 컴포넌트: Router Provider 래핑
+ * 최상위 App
  */
 export function App() {
   return (

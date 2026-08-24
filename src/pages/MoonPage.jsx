@@ -19,7 +19,7 @@ export function MoonPage({
   authProvider = null,
   isDevChuseokDay = false,
   onToggleDevChuseok,
-  onLoginSuccess,
+  onOAuthLogin,
   onOpenLoginModal,
   onLogout,
 }) {
@@ -326,10 +326,7 @@ export function MoonPage({
       <LoginModal
         isOpen={isLocalLoginOpen}
         onClose={() => setIsLocalLoginOpen(false)}
-        onLoginSuccess={(userInfo) => {
-          onLoginSuccess?.(userInfo);
-          setIsLocalLoginOpen(false);
-        }}
+        onOAuthLogin={onOAuthLogin}
       />
     </div>
   );

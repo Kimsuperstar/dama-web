@@ -1,30 +1,20 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { DamaLogo } from '../components/DamaLogo';
-import { X, Sparkles, Moon, ArrowLeft } from 'lucide-react';
+import { Moon, ArrowLeft } from 'lucide-react';
 
-/**
- * 로그인 페이지 화면 (경로: /login)
- */
 export function LoginPage({
-  onLoginSuccess,
+  onOAuthLogin,
 }) {
   const navigate = useNavigate();
 
   const handleKakao = () => {
-    onLoginSuccess?.({ provider: 'kakao', name: '카카오 사용자' });
-    navigate('/');
+    onOAuthLogin('kakao');
   };
 
   const handleNaver = () => {
-    onLoginSuccess?.({ provider: 'naver', name: '네이버 사용자' });
-    navigate('/');
-  };
-
-  const handleDev = () => {
-    onLoginSuccess?.({ provider: 'developer', name: '테스트 관리자' });
-    navigate('/moon/moon-developer');
+    onOAuthLogin('naver');
   };
 
   return (
@@ -89,18 +79,6 @@ export function LoginPage({
             </svg>
             <span>네이버로 시작하기</span>
           </button>
-
-          {/* Developer Test Login Button */}
-          <div className="pt-2">
-            <button
-              type="button"
-              onClick={handleDev}
-              className="w-full h-11 bg-white hover:bg-[#FFF1C7]/30 border-2 border-dashed border-[#6B4AA6]/60 text-[#6B4AA6] rounded-2xl font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-[0.99]"
-            >
-              <span>🧪</span>
-              <span>개발자 / 테스트용 원클릭 로그인</span>
-            </button>
-          </div>
         </div>
 
         {/* Notice Info */}
