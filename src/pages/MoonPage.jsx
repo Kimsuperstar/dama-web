@@ -17,10 +17,12 @@ import { INITIAL_BIBLE_VERSES, INITIAL_MOCK_MESSAGES } from '../data/verses';
 export function MoonPage({
   isLoggedIn = false,
   authProvider = null,
+  currentUser = null,
   isDevChuseokDay = false,
   onToggleDevChuseok,
   onOAuthLogin,
   onOpenLoginModal,
+  onOpenNicknameModal,
   onLogout,
 }) {
   const { moonId } = useParams();
@@ -210,6 +212,7 @@ export function MoonPage({
         <HeroMoonSection
           isLoggedIn={isLoggedIn}
           authProvider={authProvider}
+          currentUser={currentUser}
           moonData={moonData}
           userRole={userRole}
           onChangeUserRole={setUserRole}
@@ -218,6 +221,7 @@ export function MoonPage({
           onOpenLeaveVerse={() => setLeaveFlowStep('chooseMethod')}
           onOpenViewVerses={() => setIsViewVersesOpen(true)}
           onOpenCreateMoon={handleRequestCreateMoon}
+          onOpenNicknameModal={onOpenNicknameModal}
           onBackToLanding={() => navigate('/')}
         />
       )}

@@ -3,15 +3,16 @@ import { motion, AnimatePresence } from 'motion/react';
 import { MoonVisual } from './MoonVisual';
 import { ChuseokCountdown } from './ChuseokCountdown';
 import { CHUSEOK_OPEN_AT } from '../constants/chuseok';
-import { 
-  Share2, 
-  Link2, 
-  BookOpen, 
-  Clock, 
-  Heart, 
-  Gift, 
-  Mail, 
-  Check, 
+import {
+  Share2,
+  Link2,
+  BookOpen,
+  Clock,
+  Heart,
+  Gift,
+  Mail,
+  Pencil,
+  Check,
   Sparkles,
   ChevronRight,
   Layers,
@@ -25,6 +26,7 @@ import {
 export function HeroMoonSection({
   isLoggedIn = false,
   authProvider = null,
+  currentUser = null,
   moonData,
   userRole = 'visitor',
   onChangeUserRole,
@@ -33,6 +35,7 @@ export function HeroMoonSection({
   onOpenLeaveVerse,
   onOpenViewVerses,
   onOpenCreateMoon,
+  onOpenNicknameModal,
   onBackToLanding,
 }) {
   // 토스트 알림 스택 상태
@@ -41,10 +44,15 @@ export function HeroMoonSection({
   // 2026년 추석 당일 판별 (상수 CHUSEOK_OPEN_AT 활용)
   const isChuseokPeriod = isDevChuseokDay || (Date.now() >= CHUSEOK_OPEN_AT);
 
+  const displayOwnerName =
+    userRole === 'owner' && currentUser?.nickname
+      ? currentUser.nickname
+      : moonData?.ownerName || '친구';
+
   const messagesCount = moonData?.messages?.length || 0;
   const targetCount = moonData?.targetCount || 15;
   const originalPercentage = Math.min(100, Math.round((messagesCount / targetCount) * 100));
-  
+
   // 추석 당일이 되면 아직 15개가 다 모이지 않았더라도 모든 보름달을 환한 만월(100%)로 표시
   const displayPercentage = isChuseokPeriod ? 100 : originalPercentage;
 
@@ -130,7 +138,34 @@ export function HeroMoonSection({
         {/* Title Section */}
         <div className="mb-2 w-full flex flex-col items-center">
           <h1 className="font-display text-3xl sm:text-[34px] font-bold text-[#3F315F] tracking-tight leading-tight mb-1.5 flex items-center justify-center gap-2">
-            <span>{moonData?.ownerName || '나'}의 보름달</span>
+
+            <span>
+              {displayOwnerName}의 보름달
+            </span>
+
+            {/* 내 보름달일 때만 닉네임 수정 버튼 표시 */}
+            {isLoggedIn && userRole === 'owner' && (
+              <button
+                type="button"
+                onClick={onOpenNicknameModal}
+                className="
+        w-8
+        h-8
+        rounded-full
+        flex
+        items-center
+        justify-center
+        text-[#6B4AA6]
+        hover:bg-[#EADDFF]
+        transition-colors
+      "
+                aria-label="닉네임 수정"
+                title="닉네임 수정"
+              >
+                <Pencil className="w-4 h-4" />
+              </button>
+            )}
+
           </h1>
 
           <p className="text-sm sm:text-base text-[#565B86] leading-relaxed break-keep font-medium">
@@ -166,9 +201,9 @@ export function HeroMoonSection({
         </div>
 
         {/* 2026 Chuseok Real-time Countdown Timer */}
-        <ChuseokCountdown 
-          isDevChuseokDay={isDevChuseokDay} 
-          onToggleDevChuseok={onToggleDevChuseok} 
+        <ChuseokCountdown
+          isDevChuseokDay={isDevChuseokDay}
+          onToggleDevChuseok={onToggleDevChuseok}
         />
 
         {/* Progress Info Container */}
@@ -179,16 +214,16 @@ export function HeroMoonSection({
               <span>
                 {isChuseokPeriod
                   ? `보름달처럼 풍성한 한가위 되세요! 🌕`
-                  : messagesCount >= 15 
-                    ? `만월 완성! 총 ${messagesCount}개의 말씀이 모였어요 🌕` 
+                  : messagesCount >= 15
+                    ? `만월 완성! 총 ${messagesCount}개의 말씀이 모였어요 🌕`
                     : `받은 말씀 ${messagesCount}개 | 15개가 모이면 만월 완성 (${originalPercentage}%)`}
               </span>
             </div>
             <span className="text-[11px] text-[#565B86] break-keep">
               {isChuseokPeriod
                 ? `추석을 맞이하여 온 세상을 환하게 비추는 만월이 되었습니다. (총 ${messagesCount}개의 축복 말씀)`
-                : messagesCount >= 15 
-                  ? '보름달이 가득 찼어요! 계속해서 축복의 말씀을 더해주실 수 있어요.' 
+                : messagesCount >= 15
+                  ? '보름달이 가득 찼어요! 계속해서 축복의 말씀을 더해주실 수 있어요.'
                   : '음력 8월 15일 보름달처럼 15개의 말씀으로 환한 달이 채워져요.'}
             </span>
           </div>
@@ -199,11 +234,10 @@ export function HeroMoonSection({
               initial={{ width: 0 }}
               animate={{ width: `${displayPercentage}%` }}
               transition={{ duration: 1.2, ease: 'easeOut' }}
-              className={`h-full rounded-full ${
-                isChuseokPeriod 
-                  ? 'bg-gradient-to-r from-[#BA1A1A] via-[#6B4AA6] to-[#53318C]' 
+              className={`h-full rounded-full ${isChuseokPeriod
+                  ? 'bg-gradient-to-r from-[#BA1A1A] via-[#6B4AA6] to-[#53318C]'
                   : 'bg-gradient-to-r from-[#6B4AA6] to-[#53318C]'
-              }`}
+                }`}
             />
           </div>
 

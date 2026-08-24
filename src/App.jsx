@@ -12,6 +12,7 @@ import { LandingPage } from './pages/LandingPage';
 import { MoonPage } from './pages/MoonPage';
 import { LoginPage } from './pages/LoginPage';
 import { CreateMoonModal } from './components/CreateMoonModal';
+import { NicknameModal } from './components/NicknameModal';
 import { LoginModal } from './components/LoginModal';
 import { DesignSystemReviewModal } from './components/DesignSystemReviewModal';
 
@@ -48,6 +49,8 @@ function AppContent() {
   const [isCreateMoonModalOpen, setIsCreateMoonModalOpen] =
     useState(false);
   const [isDesignReviewOpen, setIsDesignReviewOpen] = useState(false);
+  const [isNicknameModalOpen, setIsNicknameModalOpen] =
+    useState(false);
 
   // =========================================================
   // React ↔ Spring Boot 연결 확인
@@ -240,6 +243,44 @@ function AppContent() {
   };
 
   // =========================================================
+  // 닉네임 변경
+  // =========================================================
+
+  const updateNickname = async (nickname) => {
+    const response = await fetch(
+      `${API_BASE_URL}/api/v1/users/me/nickname`,
+      {
+        method: 'PATCH',
+
+        headers: {
+          'Content-Type': 'application/json',
+        },
+
+        credentials: 'include',
+
+        body: JSON.stringify({
+          nickname: nickname,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `닉네임 변경 실패: HTTP ${response.status}`
+      );
+    }
+
+    const user = await response.json();
+
+    console.log('닉네임 변경 완료:', user);
+
+    // 여기 중요
+    // 서버에서 받은 최신 User로 로그인 사용자 갱신
+    setCurrentUser(user);
+
+    return user;
+  };
+  // =========================================================
   // 새 보름달 생성 요청
   // =========================================================
 
@@ -355,6 +396,10 @@ function AppContent() {
 
                 onOAuthLogin={handleOAuthLogin}
 
+                onOpenNicknameModal={() =>
+                  setIsNicknameModalOpen(true)
+                }
+
                 onToggleDevChuseok={() =>
                   setIsDevChuseokDay((prev) => !prev)
                 }
@@ -426,6 +471,16 @@ function AppContent() {
           setIsLoginModalOpen(false)
         }
         onOAuthLogin={handleOAuthLogin}
+      />
+
+      {/* 닉네임 설정 / 수정 */}
+      <NicknameModal
+        isOpen={isNicknameModalOpen}
+        currentNickname={currentUser?.nickname ?? ''}
+        onClose={() =>
+          setIsNicknameModalOpen(false)
+        }
+        onSave={updateNickname}
       />
 
       {/* 디자인 리뷰 */}
