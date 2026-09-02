@@ -24,115 +24,153 @@ export function MoonPage({
   onOpenLoginModal,
   onOpenNicknameModal,
   onLogout,
+  onSessionExpired,
 }) {
   const { moonId } = useParams();
   const navigate = useNavigate();
 
-  // 보름달 데이터 로드
-  const [moonData, setMoonData] = useState(() => {
-    const currentId = moonId || 'demo';
-    const storedMoons = localStorage.getItem('dama_all_moons');
-    if (storedMoons) {
-      try {
-        const parsed = JSON.parse(storedMoons);
-        if (parsed[currentId]) {
-          return parsed[currentId];
-        }
-      } catch {
-        // ignore
-      }
-    }
+  // 보름달 데이터
+  const [moonData, setMoonData] = useState(null);
 
-    if (currentId === 'demo') {
-      return {
-        id: 'demo',
-        ownerName: '소망',
-        targetCount: 15,
-        messages: INITIAL_MOCK_MESSAGES,
-        dDay: '추석까지 D-12',
-      };
-    }
+  const API_BASE_URL = 'http://localhost:8080';
 
-    if (currentId === 'moon-developer') {
-      return {
-        id: 'moon-developer',
-        ownerName: '개발자',
-        targetCount: 15,
-        messages: INITIAL_MOCK_MESSAGES,
-        dDay: '추석까지 D-12',
-      };
-    }
-
-    return {
-      id: currentId,
-      ownerName: currentId === 'demo' ? '소망' : '친구',
-      targetCount: 15,
-      messages: [],
-      dDay: '추석까지 D-12',
-    };
-  });
-
-  // moonId 변경 시 데이터 동기화
+ // =========================================================
+  // moonId가 변경되면 실제 Spring Boot에서 Moon 조회
+  // =========================================================
   useEffect(() => {
-    const currentId = moonId || 'demo';
-    const storedMoons = localStorage.getItem('dama_all_moons');
-    if (storedMoons) {
+
+    const fetchMoon = async () => {
+
+      // 데모 Moon
+      if (moonId === 'demo') {
+        setMoonData({
+          id: 'demo',
+          ownerName: '소망',
+          targetCount: 15,
+          messages: INITIAL_MOCK_MESSAGES,
+          dDay: '추석까지 D-12',
+        });
+
+        return;
+      }
+
+
+      // 개발용 Moon
+      if (moonId === 'moon-developer') {
+        setMoonData({
+          id: 'moon-developer',
+          ownerName: '개발자',
+          targetCount: 15,
+          messages: INITIAL_MOCK_MESSAGES,
+          dDay: '추석까지 D-12',
+        });
+
+        return;
+      }
+
+
       try {
-        const parsed = JSON.parse(storedMoons);
-        if (parsed[currentId]) {
-          setMoonData(parsed[currentId]);
+
+        // =====================================================
+        // 1. Moon 정보 조회
+        // =====================================================
+
+        const response = await fetch(
+          `${API_BASE_URL}/api/v1/moons/${moonId}`,
+          {
+            credentials: 'include',
+          }
+        );
+
+
+        // 로그인 세션 만료
+        if (response.status === 401) {
+          onSessionExpired?.();
           return;
         }
-      } catch {
-        // ignore
-      }
-    }
 
-    if (currentId === 'demo') {
-      setMoonData({
-        id: 'demo',
-        ownerName: '소망',
-        targetCount: 15,
-        messages: INITIAL_MOCK_MESSAGES,
-        dDay: '추석까지 D-12',
-      });
-    } else if (currentId === 'moon-developer') {
-      setMoonData({
-        id: 'moon-developer',
-        ownerName: '개발자',
-        targetCount: 15,
-        messages: INITIAL_MOCK_MESSAGES,
-        dDay: '추석까지 D-12',
-      });
-    } else {
-      setMoonData({
-        id: currentId,
-        ownerName: '친구',
-        targetCount: 15,
-        messages: [],
-        dDay: '추석까지 D-12',
-      });
-    }
-  }, [moonId]);
 
-  // 로컬스토리지 저장
-  useEffect(() => {
-    if (moonData && moonData.id) {
-      localStorage.setItem('dama_current_moon', JSON.stringify(moonData));
-
-      const storedMoons = localStorage.getItem('dama_all_moons');
-      let moonsMap = {};
-      if (storedMoons) {
-        try {
-          moonsMap = JSON.parse(storedMoons);
-        } catch {
-          moonsMap = {};
+        if (!response.ok) {
+          throw new Error(
+            `보름달 조회 실패: ${response.status}`
+          );
         }
+
+
+        const moon =
+          await response.json();
+
+
+        console.log(
+          '서버에서 조회한 Moon:',
+          moon
+        );
+
+
+        // =====================================================
+        // 2. 받은 말씀 목록 조회
+        // =====================================================
+
+        const messagesResponse = await fetch(
+          `${API_BASE_URL}/api/v1/moons/${moonId}/messages`,
+          {
+            credentials: 'include',
+          }
+        );
+
+
+        if (messagesResponse.status === 401) {
+          onSessionExpired?.();
+          return;
+        }
+
+
+        if (!messagesResponse.ok) {
+          throw new Error(
+            `받은 말씀 조회 실패: ${messagesResponse.status}`
+          );
+        }
+
+
+        const messages =
+          await messagesResponse.json();
+
+
+        console.log(
+          '받은 말씀 목록:',
+          messages
+        );
+
+
+        // =====================================================
+        // 3. 화면에 사용할 Moon 데이터 완성
+        // =====================================================
+
+        setMoonData({
+          ...moon,
+
+          targetCount: 15,
+
+          // 실제 DB 데이터
+          messages: messages,
+
+          dDay: '추석까지 D-12',
+        });
+
+
+      } catch (error) {
+
+        console.error(
+          '보름달 조회 실패:',
+          error
+        );
       }
-      moonsMap[moonData.id] = moonData;
-      localStorage.setItem('dama_all_moons', JSON.stringify(moonsMap));
-    }
-  }, [moonData]);
+    };
+
+
+    fetchMoon();
+
+  }, [moonId]);
 
   // 사용자 권한 상태 ('visitor' | 'owner')
   const [userRole, setUserRole] = useState(() => {
@@ -204,6 +242,14 @@ export function MoonPage({
     setUserRole('owner');
     navigate(`/moon/${newMoon.id}`);
   };
+
+  if (!moonData) {
+    return (
+      <div className="w-full flex justify-center">
+        보름달을 불러오는 중...
+      </div>
+    );
+  }
 
   return (
     <div className="w-full flex justify-center">

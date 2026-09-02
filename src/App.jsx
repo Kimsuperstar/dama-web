@@ -15,6 +15,7 @@ import { CreateMoonModal } from './components/CreateMoonModal';
 import { NicknameModal } from './components/NicknameModal';
 import { LoginModal } from './components/LoginModal';
 import { DesignSystemReviewModal } from './components/DesignSystemReviewModal';
+import { FriendMoonPage } from './pages/FriendMoonPage';
 
 /**
  * Spring Boot 서버 주소
@@ -102,7 +103,7 @@ function AppContent() {
 
         if (!response.ok) {
           throw new Error(
-            `사용자 조회 실패: HTTP ${response.status}`
+            `로그인 상태 확인 실패: ${response.status}`
           );
         }
 
@@ -127,50 +128,113 @@ function AppContent() {
     checkLoginStatus();
   }, []);
 
-  // =========================================================
-  // OAuth 로그인 성공 후 처리
-  // =========================================================
+// =========================================================
+// OAuth 로그인 성공 후 처리
+// =========================================================
 
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
+useEffect(() => {
+  const params = new URLSearchParams(location.search);
 
-    const loginResult = params.get('login');
+  const loginResult = params.get('login');
 
-    if (loginResult === 'success') {
-      // OAuth 로그인 후 Spring이
-      // http://localhost:5173/?login=success
-      // 로 돌려보냈을 경우
+  if (loginResult === 'success') {
 
-      fetch(`${API_BASE_URL}/api/v1/users/me`, {
-        credentials: 'include',
-      })
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error('로그인 사용자 조회 실패');
+    const handleOAuthLoginSuccess = async () => {
+      try {
+
+        // 1. 로그인 사용자 조회
+        const userResponse = await fetch(
+          `${API_BASE_URL}/api/v1/users/me`,
+          {
+            credentials: 'include',
           }
+        );
 
-          return response.json();
-        })
-        .then((user) => {
-          setCurrentUser(user);
-          setIsLoggedIn(true);
-          setAuthProvider(
-            user.provider?.toLowerCase() ?? null
+        if (!userResponse.ok) {
+          throw new Error('로그인 사용자 조회 실패');
+        }
+
+        const user = await userResponse.json();
+
+        // 2. 로그인 상태 저장
+        setCurrentUser(user);
+        setIsLoggedIn(true);
+
+        setAuthProvider(
+          user.provider?.toLowerCase() ?? null
+        );
+
+        setIsLoginModalOpen(false);
+
+
+        // 3. 이 사용자의 2026년 보름달이 있는지 조회
+        const moonResponse = await fetch(
+          `${API_BASE_URL}/api/v1/moons/me?seasonYear=2026`,
+          {
+            credentials: 'include',
+          }
+        );
+
+
+        // 4. 기존 Moon이 있으면
+        if (moonResponse.ok) {
+
+          const moon = await moonResponse.json();
+
+          console.log(
+            '기존 보름달 있음:',
+            moon
           );
 
-          setIsLoginModalOpen(false);
+          // 생성 모달은 열지 않음
+          setIsCreateMoonModalOpen(false);
 
-          // 로그인 성공 후 보름달 생성 모달
+          // 기존 보름달로 이동
+          navigate(`/moon/${moon.id}`, {
+            replace: true,
+          });
+
+          return;
+        }
+
+
+        // 5. Moon이 없으면 404
+        if (moonResponse.status === 404) {
+
+          console.log(
+            '기존 보름달 없음 → 생성 모달 열기'
+          );
+
           setIsCreateMoonModalOpen(true);
 
-          // URL의 ?login=success 제거
-          navigate('/', { replace: true });
-        })
-        .catch((error) => {
-          console.error('OAuth 로그인 처리 실패:', error);
-        });
-    }
-  }, [location.search, navigate]);
+          // ?login=success 제거
+          navigate('/', {
+            replace: true,
+          });
+
+          return;
+        }
+
+
+        // 404 이외의 실패
+        throw new Error(
+          `내 보름달 조회 실패: ${moonResponse.status}`
+        );
+
+      } catch (error) {
+
+        console.error(
+          'OAuth 로그인 처리 실패:',
+          error
+        );
+      }
+    };
+
+
+    handleOAuthLoginSuccess();
+  }
+
+}, [location.search, navigate]);
 
   // =========================================================
   // 기존 ?moon=... 주소 호환
@@ -219,7 +283,7 @@ function AppContent() {
   const handleLogout = async () => {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/logout`,
+        `${API_BASE_URL}/api/v1/auth/logout`,
         {
           method: 'POST',
           credentials: 'include',
@@ -240,6 +304,20 @@ function AppContent() {
     } catch (error) {
       console.error('로그아웃 실패:', error);
     }
+  };
+
+  // =========================================================
+  // 로그인 세션 만료 처리
+  // =========================================================
+
+  const handleSessionExpired = () => {
+    setIsLoggedIn(false);
+    setAuthProvider(null);
+    setCurrentUser(null);
+
+    setIsLoginModalOpen(true);
+
+    navigate('/');
   };
 
   // =========================================================
@@ -297,10 +375,46 @@ function AppContent() {
   // 보름달 생성 완료
   // =========================================================
 
-  const handleCreateMoon = (newMoon) => {
-    setIsCreateMoonModalOpen(false);
+  const handleCreateMoon = async (ownerName) => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/v1/moons`,
+        {
+          method: 'POST',
 
-    navigate(`/moon/${newMoon.id}`);
+          headers: {
+            'Content-Type': 'application/json',
+          },
+
+          credentials: 'include',
+
+          body: JSON.stringify({
+            ownerName: ownerName,
+            seasonYear: 2026,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `보름달 생성 실패: HTTP ${response.status}`
+        );
+      }
+
+      const moon = await response.json();
+
+      console.log('보름달 생성 완료:', moon);
+
+      setIsCreateMoonModalOpen(false);
+
+      navigate(`/moon/${moon.id}`);
+
+    } catch (error) {
+      console.error(
+        '보름달 생성 실패:',
+        error
+      );
+    }
   };
 
   // =========================================================
@@ -392,26 +506,33 @@ function AppContent() {
                 isLoggedIn={isLoggedIn}
                 authProvider={authProvider}
                 currentUser={currentUser}
+                onSessionExpired={handleSessionExpired}
                 isDevChuseokDay={isDevChuseokDay}
-
                 onOAuthLogin={handleOAuthLogin}
-
                 onOpenNicknameModal={() =>
                   setIsNicknameModalOpen(true)
                 }
-
                 onToggleDevChuseok={() =>
-                  setIsDevChuseokDay((prev) => !prev)
+                  setIsDevChuseokDay(
+                    (prev) => !prev
+                  )
                 }
-
                 onOpenLoginModal={() =>
                   setIsLoginModalOpen(true)
                 }
-
                 onLogout={handleLogout}
               />
             }
           />
+
+          {/* 친구가 공유 링크로 들어오는 보름달 */}
+          <Route
+            path="/share/:shareToken"
+            element={
+              <FriendMoonPage />
+            }
+          />
+
 
           {/* 로그인 페이지 */}
           <Route
@@ -458,9 +579,7 @@ function AppContent() {
       {/* 보름달 생성 */}
       <CreateMoonModal
         isOpen={isCreateMoonModalOpen}
-        onClose={() =>
-          setIsCreateMoonModalOpen(false)
-        }
+        onClose={() => setIsCreateMoonModalOpen(false)}
         onCreateMoon={handleCreateMoon}
       />
 

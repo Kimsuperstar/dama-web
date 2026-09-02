@@ -1,12 +1,12 @@
 export const HEART_CATEGORIES = [
-  { id: '감사', name: '감사', emoji: '💛', color: '#B58200', bgActive: '#FFF1C7', borderActive: '#6B4AA6', desc: '감사의 마음을 담아' },
-  { id: '응원', name: '응원', emoji: '⭐', color: '#6B4AA6', bgActive: '#EADDFF', borderActive: '#6B4AA6', desc: '응원의 마음을 담아' },
-  { id: '위로', name: '위로', emoji: '☁️', color: '#565B86', bgActive: '#CACEFF', borderActive: '#565B86', desc: '위로의 마음을 담아' },
-  { id: '축복', name: '축복', emoji: '🎁', color: '#785160', bgActive: '#FAC8D9', borderActive: '#785160', desc: '축복의 마음을 담아' },
-  { id: '사랑', name: '사랑', emoji: '💖', color: '#BA1A1A', bgActive: '#FFDAD6', borderActive: '#BA1A1A', desc: '사랑의 마음을 담아' },
-  { id: '평안', name: '평안', emoji: '🌿', color: '#2E7D32', bgActive: '#E8F5E9', borderActive: '#2E7D32', desc: '평안의 마음을 담아' },
-  { id: '새출발', name: '새출발', emoji: '🌱', color: '#4E7037', bgActive: '#E9F5DF', borderActive: '#4E7037', desc: '새로운 시작을 응원하며' },
-  { id: '믿음', name: '믿음', emoji: '✨', color: '#53318C', bgActive: '#E0CDFF', borderActive: '#53318C', desc: '믿음과 소망을 담아' },
+  { id: '감사', value: 'THANKS', name: '감사', emoji: '💛', color: '#B58200', bgActive: '#FFF1C7', borderActive: '#6B4AA6', desc: '감사의 마음을 담아' },
+  { id: '응원', value: 'ENCOURAGE', name: '응원', emoji: '⭐', color: '#6B4AA6', bgActive: '#EADDFF', borderActive: '#6B4AA6', desc: '응원의 마음을 담아' },
+  { id: '위로', value: 'COMFORT', name: '위로', emoji: '☁️', color: '#565B86', bgActive: '#CACEFF', borderActive: '#565B86', desc: '위로의 마음을 담아' },
+  { id: '축복', value: 'BLESSING', name: '축복', emoji: '🎁', color: '#785160', bgActive: '#FAC8D9', borderActive: '#785160', desc: '축복의 마음을 담아' },
+  { id: '사랑', value: 'LOVE', name: '사랑', emoji: '💖', color: '#BA1A1A', bgActive: '#FFDAD6', borderActive: '#BA1A1A', desc: '사랑의 마음을 담아' },
+  { id: '평안', value: 'PEACE', name: '평안', emoji: '🌿', color: '#2E7D32', bgActive: '#E8F5E9', borderActive: '#2E7D32', desc: '평안의 마음을 담아' },
+  { id: '새출발', value: 'NEW_START', name: '새출발', emoji: '🌱', color: '#4E7037', bgActive: '#E9F5DF', borderActive: '#4E7037', desc: '새로운 시작을 응원하며' },
+  { id: '믿음', value: 'FAITH', name: '믿음', emoji: '✨', color: '#53318C', bgActive: '#E0CDFF', borderActive: '#53318C', desc: '믿음과 소망을 담아' },
 ];
 
 export const INITIAL_BIBLE_VERSES = [

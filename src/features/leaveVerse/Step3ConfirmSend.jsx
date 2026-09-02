@@ -36,13 +36,18 @@ export function Step3ConfirmSend({
   const displayAuthor = isAnonymous ? '익명의 친구' : (authorName.trim() || '친구');
 
   // 말씀 담기 버튼 클릭 시 애니메이션 연출 후 완료 상태로 전환
-  const handleSend = () => {
-    setIsSubmitting(true);
-    setTimeout(() => {
-      onConfirmSend();
-      setIsSubmitting(false);
+  const handleSend = async () => {
+    try {
+      await onConfirmSend();
+
+      // DB 저장 성공한 경우에만
       setIsSubmitted(true);
-    }, 600);
+    } catch (error) {
+      console.error(
+        '말씀 전송 실패:',
+        error
+      );
+    }
   };
 
   // 전송 완료 후 화면

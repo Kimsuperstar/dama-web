@@ -25,21 +25,16 @@ import { DamaLogo } from './DamaLogo';
     onClose();
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name.trim()) return;
 
     const trimmedName = name.trim();
-    const newMoon = {
-      id: `moon-${Date.now()}`,
-      ownerName: trimmedName,
-      targetCount: 15, // 음력 15일 보름달 기준 고정
-      messages: [],
-      dDay: '추석까지 D-12',
-    };
 
-    onCreateMoon(newMoon);
-    setCreatedUrl(`${window.location.origin}/moon/${newMoon.id}`);
+    if (!trimmedName) {
+      return;
+    }
+
+    await onCreateMoon(trimmedName);
   };
 
   const handleCopy = () => {

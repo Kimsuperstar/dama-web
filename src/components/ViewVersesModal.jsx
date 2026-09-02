@@ -29,6 +29,30 @@ export function ViewVersesModal({
   const isChuseokPassed = Date.now() >= CHUSEOK_OPEN_AT;
   const isActuallyUnlocked = isDevChuseokDay || isChuseokPassed || previewUnlocked;
 
+  const getCategoryName = (categoryValue) => {
+    const category = HEART_CATEGORIES.find(
+      (item) => item.value === categoryValue
+    );
+
+    return category?.name ?? categoryValue;
+  };
+
+  const getVerseReference = (message) => {
+    if (message.sourceType === 'MANUAL') {
+      return message.manualReference;
+    }
+
+    return message.verseReference ?? '';
+  };
+
+  const getVerseText = (message) => {
+    if (message.sourceType === 'MANUAL') {
+      return message.manualText;
+    }
+
+    return message.verseText ?? '';
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/50 backdrop-blur-xs">
       <motion.div
@@ -132,15 +156,15 @@ export function ViewVersesModal({
             전체 ({messages.length})
           </button>
           {HEART_CATEGORIES.map((cat) => {
-            const count = messages.filter((m) => m.category === cat.id).length;
+            const count = messages.filter((m) => m.category === cat.value).length;
             if (count === 0) return null;
             return (
               <button
                 key={cat.id}
                 type="button"
-                onClick={() => setActiveCategory(cat.id)}
+                onClick={() => setActiveCategory(cat.value)}
                 className={`px-3.5 py-1.5 rounded-full text-xs font-bold shrink-0 flex items-center gap-1.5 transition-all ${
-                  activeCategory === cat.id
+                  activeCategory === cat.value
                     ? 'bg-[#6B4AA6] text-white shadow-xs'
                     : 'bg-white text-[#3F315F] border border-[#E8B7C8] hover:bg-[#FFF1C7]/40'
                 }`}
@@ -183,7 +207,7 @@ export function ViewVersesModal({
                   <div className="flex items-center justify-between mb-2.5">
                     <div className="flex items-center gap-1.5">
                       <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#EADDFF] text-[#6B4AA6]">
-                        {msg.category}의 마음
+                        {getCategoryName(msg.category)}의 마음
                       </span>
                       {isLocked ? (
                         <span className="text-[11px] font-semibold text-[#8C7A9C] flex items-center gap-1">
@@ -193,7 +217,7 @@ export function ViewVersesModal({
                       ) : (
                         <span className="text-xs font-bold text-[#3F315F] flex items-center gap-1">
                           <BookOpen className="w-3.5 h-3.5 text-[#6B4AA6]" />
-                          {msg.verseReference}
+                          {getVerseReference(msg)}
                         </span>
                       )}
                     </div>
@@ -217,7 +241,7 @@ export function ViewVersesModal({
                     <div>
                       {/* Verse Body (Unlocked) */}
                       <p className="font-serif-kr text-xs sm:text-[13px] text-[#3F315F] leading-relaxed mb-3">
-                        &ldquo;{msg.verseText}&rdquo;
+                        &ldquo;{getVerseText(msg)}&rdquo;
                       </p>
 
                       {msg.personalMessage && (
