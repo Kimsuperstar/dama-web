@@ -33,10 +33,7 @@ import {
 import { INITIAL_BIBLE_VERSES, } from '../data/verses';
 
 import { HEART_CATEGORIES } from '../data/verses';
-
-
-const API_BASE_URL = 'http://localhost:8080';
-
+import { API_BASE_URL } from '../config/api';
 
 function FriendMoonPage() {
 
@@ -120,13 +117,37 @@ function FriendMoonPage() {
                 );
 
 
-                // Spring에서 받은 실제 Moon 데이터 +
-                // 아직 프론트에서 사용하는 화면용 데이터
+                // 받은 말씀 개수 조회
+                const countResponse = await fetch(
+                    `${API_BASE_URL}/api/v1/moons/share/${shareToken}/messages/count`
+                );
+
+                if (!countResponse.ok) {
+                    throw new Error(
+                        `받은 말씀 개수 조회 실패: ${countResponse.status}`
+                    );
+                }
+
+                const messageCount =
+                    await countResponse.json();
+
+                console.log(
+                    '받은 말씀 개수:',
+                    messageCount
+                );
+
+
                 setMoon({
                     ...data,
 
                     targetCount: 15,
+
+                    // 공유 페이지에서는 본문은 가져오지 않음
                     messages: [],
+
+                    // 개수만 서버에서 가져옴
+                    messageCount: messageCount,
+
                     dDay: '추석까지 D-12',
                 });
 
@@ -277,10 +298,8 @@ function FriendMoonPage() {
             setMoon((prev) => ({
                 ...prev,
 
-                messages: [
-                    savedMessage,
-                    ...prev.messages,
-                ],
+                messageCount:
+                    (prev.messageCount ?? 0) + 1,
             }));
 
 

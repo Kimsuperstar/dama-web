@@ -16,11 +16,7 @@ import { NicknameModal } from './components/NicknameModal';
 import { LoginModal } from './components/LoginModal';
 import { DesignSystemReviewModal } from './components/DesignSystemReviewModal';
 import { FriendMoonPage } from './pages/FriendMoonPage';
-
-/**
- * Spring Boot 서버 주소
- */
-const API_BASE_URL = 'http://localhost:8080';
+import { API_BASE_URL } from './config/api';
 
 /**
  * 라우팅 및 전역 레이아웃 컴포넌트

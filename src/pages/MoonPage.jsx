@@ -10,6 +10,7 @@ import { ViewVersesModal } from '../components/ViewVersesModal';
 import { CreateMoonModal } from '../components/CreateMoonModal';
 import { LoginModal } from '../components/LoginModal';
 import { INITIAL_BIBLE_VERSES, INITIAL_MOCK_MESSAGES } from '../data/verses';
+import { API_BASE_URL } from '../config/api';
 
 /**
  * 특정 보름달 상세 및 말씀 남기기 인터랙션 페이지 (경로: /moon/:moonId)
@@ -31,8 +32,6 @@ export function MoonPage({
 
   // 보름달 데이터
   const [moonData, setMoonData] = useState(null);
-
-  const API_BASE_URL = 'http://localhost:8080';
 
  // =========================================================
   // moonId가 변경되면 실제 Spring Boot에서 Moon 조회

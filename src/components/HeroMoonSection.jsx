@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { MoonVisual } from './MoonVisual';
 import { ChuseokCountdown } from './ChuseokCountdown';
 import { CHUSEOK_OPEN_AT } from '../constants/chuseok';
+import { PUBLIC_APP_URL } from '../config/api';
 import {
   Share2,
   Link2,
@@ -49,7 +50,7 @@ export function HeroMoonSection({
       ? currentUser.nickname
       : moonData?.ownerName || '친구';
 
-  const messagesCount = moonData?.messages?.length || 0;
+  const messagesCount = moonData?.messageCount ?? moonData?.messages?.length ?? 0;
   const targetCount = moonData?.targetCount || 15;
   const originalPercentage = Math.min(100, Math.round((messagesCount / targetCount) * 100));
 
@@ -71,10 +72,11 @@ export function HeroMoonSection({
   };
 
   console.log('HeroMoonSection moonData:', moonData);
+
   // 친구들에게 내 보름달 공유하기 버튼 클릭 시
   const handleShareMoon = () => {
     const moonId = moonData?.id || 'demo';
-    const shareUrl = `${window.location.origin}/share/${moonData.shareToken}`;
+    const shareUrl = `${PUBLIC_APP_URL}/share/${moonData.shareToken}`;
     navigator.clipboard.writeText(shareUrl);
     triggerToast(
       '보름달 링크가 복사됐어요!',
