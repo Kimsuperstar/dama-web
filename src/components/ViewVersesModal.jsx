@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Lock, Sparkles, BookOpen, Clock, Heart, AlertCircle, Eye, Moon, ShieldAlert } from 'lucide-react';
+import { X, Lock, Sparkles, BookOpen, Clock, Heart, AlertCircle, Moon, ShieldAlert } from 'lucide-react';
 import { HEART_CATEGORIES } from '../data/verses';
 import { CHUSEOK_OPEN_AT } from '../constants/chuseok';
 
@@ -13,11 +13,11 @@ export function ViewVersesModal({
   onClose,
   moonData,
   isOwner = true,
+  isAdmin = false,
   isDevChuseokDay = false,
   onToggleDevChuseok,
 }) {
   const [activeCategory, setActiveCategory] = useState('전체');
-  const [previewUnlocked, setPreviewUnlocked] = useState(false);
 
   if (!isOpen) return null;
 
@@ -27,7 +27,7 @@ export function ViewVersesModal({
     : messages.filter((m) => m.category === activeCategory);
 
   const isChuseokPassed = Date.now() >= CHUSEOK_OPEN_AT;
-  const isActuallyUnlocked = isDevChuseokDay || isChuseokPassed || previewUnlocked;
+  const isActuallyUnlocked = isChuseokPassed || (isAdmin && isDevChuseokDay);
 
   const getCategoryName = (categoryValue) => {
     const category = HEART_CATEGORIES.find(
@@ -112,7 +112,7 @@ export function ViewVersesModal({
           </div>
 
           <div className="flex items-center gap-1.5 self-end sm:self-auto shrink-0">
-            {onToggleDevChuseok && (
+            {isAdmin && onToggleDevChuseok && (
               <button
                 type="button"
                 onClick={onToggleDevChuseok}
@@ -128,17 +128,6 @@ export function ViewVersesModal({
               </button>
             )}
 
-            {!isDevChuseokDay && (
-              <button
-                type="button"
-                onClick={() => setPreviewUnlocked(!previewUnlocked)}
-                className="text-[10px] font-bold text-[#6B4AA6] bg-white/90 px-2.5 py-1.5 rounded-full border border-[#6B4AA6]/30 hover:bg-[#EADDFF] flex items-center gap-1 transition-all"
-                title="모달 내부 임시 열람 토글"
-              >
-                <Eye className="w-3 h-3" />
-                <span>{previewUnlocked ? '🔒 잠금' : '🔓 열람'}</span>
-              </button>
-            )}
           </div>
         </div>
 
@@ -189,7 +178,7 @@ export function ViewVersesModal({
             </div>
           ) : (
             filteredMessages.map((msg, index) => {
-              const isLocked = !isActuallyUnlocked;
+              const isLocked = msg.locked === true || !isActuallyUnlocked;
 
               return (
                 <motion.div
@@ -276,4 +265,3 @@ export function ViewVersesModal({
     </div>
   );
 }
-

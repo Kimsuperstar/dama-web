@@ -149,14 +149,14 @@ export function MoonVisual({
               {isWaxingMoreThanHalf ? (
                 <path
                   d={`M ${cx} ${cy - radius} 
-                     A ${radius} ${radius} 0 0 1 ${cx} ${cy + radius} 
+                     A ${radius} ${radius} 0 0 0 ${cx} ${cy + radius}
                      A ${rx} ${radius} 0 0 ${sweepFlag} ${cx} ${cy - radius} Z`}
                   fill="url(#moonLitGradient)"
                 />
               ) : (
                 <path
                   d={`M ${cx} ${cy - radius} 
-                     A ${radius} ${radius} 0 0 1 ${cx} ${cy + radius} 
+                     A ${radius} ${radius} 0 0 0 ${cx} ${cy + radius}
                      A ${rx} ${radius} 0 0 ${sweepFlag} ${cx} ${cy - radius} Z`}
                   fill="url(#moonLitGradient)"
                 />

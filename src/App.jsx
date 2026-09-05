@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   BrowserRouter,
   Routes,
@@ -11,6 +11,9 @@ import { Header } from './components/Header';
 import { LandingPage } from './pages/LandingPage';
 import { MoonPage } from './pages/MoonPage';
 import { LoginPage } from './pages/LoginPage';
+import { SupportPage } from './pages/SupportPage';
+import { TermsPage } from './pages/TermsPage';
+import { PrivacyPage } from './pages/PrivacyPage';
 import { CreateMoonModal } from './components/CreateMoonModal';
 import { NicknameModal } from './components/NicknameModal';
 import { LoginModal } from './components/LoginModal';
@@ -37,6 +40,10 @@ function AppContent() {
   const [isAuthLoading, setIsAuthLoading] = useState(true);
 
   const [isDevChuseokDay, setIsDevChuseokDay] = useState(false);
+  const realIsAdmin = currentUser?.role === 'ADMIN';
+  const [adminViewMode, setAdminViewMode] = useState('admin');
+  const isAdmin = realIsAdmin && adminViewMode === 'admin';
+  const isPreviewingAsUser = realIsAdmin && adminViewMode === 'user';
 
   // =========================================================
   // 모달 상태
@@ -306,7 +313,7 @@ useEffect(() => {
   // 로그인 세션 만료 처리
   // =========================================================
 
-  const handleSessionExpired = () => {
+  const handleSessionExpired = useCallback(() => {
     setIsLoggedIn(false);
     setAuthProvider(null);
     setCurrentUser(null);
@@ -314,6 +321,105 @@ useEffect(() => {
     setIsLoginModalOpen(true);
 
     navigate('/');
+  }, [navigate]);
+
+  const navigateToMyMoonOrCreate = useCallback(async ({ replace = false } = {}) => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/v1/moons/me?seasonYear=2026`,
+        {
+          credentials: 'include',
+        }
+      );
+
+      if (response.ok) {
+        const moon = await response.json();
+
+        navigate(`/moon/${moon.id}`, {
+          replace,
+        });
+
+        return;
+      }
+
+      if (response.status === 404) {
+        setIsCreateMoonModalOpen(true);
+        return;
+      }
+
+      if (response.status === 401) {
+        handleSessionExpired();
+        return;
+      }
+
+      throw new Error(`내 보름달 조회 실패: HTTP ${response.status}`);
+    } catch (error) {
+      console.error('내 보름달 이동 실패:', error);
+    }
+  }, [handleSessionExpired, navigate]);
+
+  const handleGoHome = () => {
+    if (isLoggedIn) {
+      navigateToMyMoonOrCreate();
+      return;
+    }
+
+    navigate('/');
+  };
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+
+    if (
+      isAuthLoading ||
+      !isLoggedIn ||
+      location.pathname !== '/' ||
+      params.get('login') === 'success'
+    ) {
+      return;
+    }
+
+    navigateToMyMoonOrCreate({
+      replace: true,
+    });
+  }, [
+    isAuthLoading,
+    isLoggedIn,
+    location.pathname,
+    location.search,
+    navigateToMyMoonOrCreate,
+  ]);
+
+  useEffect(() => {
+    if (!realIsAdmin) {
+      setAdminViewMode('admin');
+      setIsDevChuseokDay(false);
+    }
+  }, [realIsAdmin]);
+
+  const handleToggleAdminViewMode = () => {
+    if (!realIsAdmin) {
+      return;
+    }
+
+    setAdminViewMode((prev) => {
+      const nextMode = prev === 'admin' ? 'user' : 'admin';
+
+      if (nextMode === 'user') {
+        setIsDevChuseokDay(false);
+      }
+
+      return nextMode;
+    });
+  };
+
+  const handleToggleAdminChuseokPreview = () => {
+    if (!isAdmin) {
+      setIsDevChuseokDay(false);
+      return;
+    }
+
+    setIsDevChuseokDay((prev) => !prev);
   };
 
   // =========================================================
@@ -419,6 +525,38 @@ useEffect(() => {
 
   const currentView =
     location.pathname === '/' ? 'landing' : 'hero';
+  const searchParams = new URLSearchParams(location.search);
+  const isHandlingOAuthSuccess =
+    location.pathname === '/' &&
+    searchParams.get('login') === 'success';
+  const shouldRedirectLoggedInHome =
+    isLoggedIn &&
+    location.pathname === '/' &&
+    !isHandlingOAuthSuccess;
+  const homeRouteElement =
+    isHandlingOAuthSuccess || shouldRedirectLoggedInHome ? (
+      <div className="w-full min-h-[60vh] flex items-center justify-center px-4 text-sm font-bold text-[#3F315F]">
+        {isHandlingOAuthSuccess
+          ? '로그인 처리 중...'
+          : '내 보름달로 이동 중...'}
+      </div>
+    ) : (
+      <LandingPage
+        isLoggedIn={isLoggedIn}
+        currentUser={currentUser}
+        onOpenLogin={() =>
+          setIsLoginModalOpen(true)
+        }
+        onOpenCreateMoon={
+          handleRequestCreateMoon
+        }
+        onExploreDemoMoon={() =>
+          navigate('/moon/demo')
+        }
+        isDevChuseokDay={isAdmin && isDevChuseokDay}
+        onToggleDevChuseok={isAdmin ? handleToggleAdminChuseokPreview : undefined}
+      />
+    );
 
   // 로그인 상태 확인 중
   if (isAuthLoading) {
@@ -446,11 +584,13 @@ useEffect(() => {
         isLoggedIn={isLoggedIn}
         authProvider={authProvider}
         currentUser={currentUser}
+        isAdmin={isAdmin}
+        realIsAdmin={realIsAdmin}
+        adminViewMode={adminViewMode}
+        onToggleAdminViewMode={handleToggleAdminViewMode}
         currentView={currentView}
         isDevChuseokDay={isDevChuseokDay}
-        onToggleDevChuseok={() =>
-          setIsDevChuseokDay((prev) => !prev)
-        }
+        onToggleDevChuseok={handleToggleAdminChuseokPreview}
         onOpenLogin={() =>
           setIsLoginModalOpen(true)
         }
@@ -459,7 +599,7 @@ useEffect(() => {
         onOpenDesignReview={() =>
           setIsDesignReviewOpen(true)
         }
-        onGoHome={() => navigate('/')}
+        onGoHome={handleGoHome}
       />
 
       {/* Main */}
@@ -469,29 +609,7 @@ useEffect(() => {
           {/* 랜딩 */}
           <Route
             path="/"
-            element={
-              <LandingPage
-                isLoggedIn={isLoggedIn}
-                currentUser={currentUser}
-                onOpenLogin={() =>
-                  setIsLoginModalOpen(true)
-                }
-                onOpenCreateMoon={
-                  handleRequestCreateMoon
-                }
-                onExploreDemoMoon={() =>
-                  navigate('/moon/demo')
-                }
-                isDevChuseokDay={
-                  isDevChuseokDay
-                }
-                onToggleDevChuseok={() =>
-                  setIsDevChuseokDay(
-                    (prev) => !prev
-                  )
-                }
-              />
-            }
+            element={homeRouteElement}
           />
 
           {/* 보름달 */}
@@ -503,16 +621,14 @@ useEffect(() => {
                 authProvider={authProvider}
                 currentUser={currentUser}
                 onSessionExpired={handleSessionExpired}
-                isDevChuseokDay={isDevChuseokDay}
+                isAdmin={isAdmin}
+                previewAsUser={isPreviewingAsUser}
+                isDevChuseokDay={isAdmin && isDevChuseokDay}
                 onOAuthLogin={handleOAuthLogin}
                 onOpenNicknameModal={() =>
                   setIsNicknameModalOpen(true)
                 }
-                onToggleDevChuseok={() =>
-                  setIsDevChuseokDay(
-                    (prev) => !prev
-                  )
-                }
+                onToggleDevChuseok={isAdmin ? handleToggleAdminChuseokPreview : undefined}
                 onOpenLoginModal={() =>
                   setIsLoginModalOpen(true)
                 }
@@ -542,6 +658,33 @@ useEffect(() => {
             }
           />
 
+          <Route
+            path="/support"
+            element={
+              <SupportPage
+                onBack={() => navigate(-1)}
+              />
+            }
+          />
+
+          <Route
+            path="/terms"
+            element={
+              <TermsPage
+                onBack={() => navigate(-1)}
+              />
+            }
+          />
+
+          <Route
+            path="/privacy"
+            element={
+              <PrivacyPage
+                onBack={() => navigate(-1)}
+              />
+            }
+          />
+
           {/* 잘못된 URL */}
           <Route
             path="*"
@@ -558,14 +701,8 @@ useEffect(() => {
                 onExploreDemoMoon={() =>
                   navigate('/moon/demo')
                 }
-                isDevChuseokDay={
-                  isDevChuseokDay
-                }
-                onToggleDevChuseok={() =>
-                  setIsDevChuseokDay(
-                    (prev) => !prev
-                  )
-                }
+                isDevChuseokDay={isAdmin && isDevChuseokDay}
+                onToggleDevChuseok={isAdmin ? handleToggleAdminChuseokPreview : undefined}
               />
             }
           />

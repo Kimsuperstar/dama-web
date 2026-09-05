@@ -1,6 +1,6 @@
 import React from 'react';
 import { DamaLogo } from './DamaLogo';
-import { Sparkles, Moon } from 'lucide-react';
+import { Sparkles, ShieldCheck, UserRound } from 'lucide-react';
 
 /**
  * 상단 글로벌 헤더 컴포넌트
@@ -8,6 +8,11 @@ import { Sparkles, Moon } from 'lucide-react';
 export function Header({
   isLoggedIn = false,
   authProvider = null,
+  currentUser = null,
+  isAdmin = false,
+  realIsAdmin = false,
+  adminViewMode = 'admin',
+  onToggleAdminViewMode,
   currentView = 'landing',
   isDevChuseokDay = false,
   onToggleDevChuseok,
@@ -18,7 +23,10 @@ export function Header({
   onGoHome,
 }) {
   // 랜딩페이지이거나 카카오/네이버 일반 로그인인 경우 개발/피드백 도구 숨김 (개발자 로그인 상태일 때만 표시)
-  const showDevTools = isLoggedIn && authProvider === 'developer' && currentView !== 'landing';
+  const showDevTools =
+    isLoggedIn &&
+    (isAdmin || currentUser?.role === 'ADMIN') &&
+    currentView !== 'landing';
 
   return (
     <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-[#FFF8EE]/90 border-b border-[#E8B7C8]/40 transition-colors">
@@ -65,6 +73,33 @@ export function Header({
               <Sparkles className="w-3.5 h-3.5 text-[#6B4AA6]" />
               <span className="hidden md:inline">디자인 피드백</span>
               <span className="md:hidden">피드백</span>
+            </button>
+          )}
+
+          {/* Login / Logout Button */}
+          {realIsAdmin && onToggleAdminViewMode && (
+            <button
+              type="button"
+              onClick={onToggleAdminViewMode}
+              className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-xs sm:text-sm font-bold border transition-all shadow-xs ${
+                adminViewMode === 'admin'
+                  ? 'bg-[#3F315F] text-white border-[#3F315F] hover:bg-[#53318C]'
+                  : 'bg-white text-[#6B4AA6] border-[#6B4AA6]/40 hover:bg-[#EADDFF]/50'
+              }`}
+              title={
+                adminViewMode === 'admin'
+                  ? '일반 사용자 화면으로 확인'
+                  : '관리자 화면으로 돌아가기'
+              }
+            >
+              {adminViewMode === 'admin' ? (
+                <UserRound className="w-3.5 h-3.5" />
+              ) : (
+                <ShieldCheck className="w-3.5 h-3.5" />
+              )}
+              <span className="hidden sm:inline">
+                {adminViewMode === 'admin' ? '사용자 모드' : '관리자 모드'}
+              </span>
             </button>
           )}
 

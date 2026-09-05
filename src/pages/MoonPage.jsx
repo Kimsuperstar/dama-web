@@ -19,6 +19,7 @@ export function MoonPage({
   isLoggedIn = false,
   authProvider = null,
   currentUser = null,
+  isAdmin = false,
   isDevChuseokDay = false,
   onToggleDevChuseok,
   onOAuthLogin,
@@ -26,6 +27,7 @@ export function MoonPage({
   onOpenNicknameModal,
   onLogout,
   onSessionExpired,
+  previewAsUser = false,
 }) {
   const { moonId } = useParams();
   const navigate = useNavigate();
@@ -110,8 +112,10 @@ export function MoonPage({
         // 2. 받은 말씀 목록 조회
         // =====================================================
 
+        const messageQuery = previewAsUser ? '?previewAsUser=true' : '';
+
         const messagesResponse = await fetch(
-          `${API_BASE_URL}/api/v1/moons/${moonId}/messages`,
+          `${API_BASE_URL}/api/v1/moons/${moonId}/messages${messageQuery}`,
           {
             credentials: 'include',
           }
@@ -169,7 +173,7 @@ export function MoonPage({
 
     fetchMoon();
 
-  }, [moonId]);
+  }, [moonId, previewAsUser, onSessionExpired]);
 
   // 사용자 권한 상태 ('visitor' | 'owner')
   const [userRole, setUserRole] = useState(() => {
@@ -261,8 +265,9 @@ export function MoonPage({
           moonData={moonData}
           userRole={userRole}
           onChangeUserRole={setUserRole}
+          isAdmin={isAdmin}
           isDevChuseokDay={isDevChuseokDay}
-          onToggleDevChuseok={onToggleDevChuseok}
+          onToggleDevChuseok={isAdmin ? onToggleDevChuseok : undefined}
           onOpenLeaveVerse={() => setLeaveFlowStep('chooseMethod')}
           onOpenViewVerses={() => setIsViewVersesOpen(true)}
           onOpenCreateMoon={handleRequestCreateMoon}
@@ -362,8 +367,9 @@ export function MoonPage({
         onClose={() => setIsViewVersesOpen(false)}
         moonData={moonData}
         isOwner={userRole === 'owner'}
+        isAdmin={isAdmin}
         isDevChuseokDay={isDevChuseokDay}
-        onToggleDevChuseok={onToggleDevChuseok}
+        onToggleDevChuseok={isAdmin ? onToggleDevChuseok : undefined}
       />
 
       <CreateMoonModal

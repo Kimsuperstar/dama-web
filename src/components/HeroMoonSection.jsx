@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Link } from 'react-router-dom';
 import { MoonVisual } from './MoonVisual';
 import { ChuseokCountdown } from './ChuseokCountdown';
 import { CHUSEOK_OPEN_AT } from '../constants/chuseok';
@@ -31,8 +32,10 @@ export function HeroMoonSection({
   moonData,
   userRole = 'visitor',
   onChangeUserRole,
+  isAdmin = false,
   isDevChuseokDay = false,
   onToggleDevChuseok,
+  canViewReceivedMessages = true,
   onOpenLeaveVerse,
   onOpenViewVerses,
   onOpenCreateMoon,
@@ -43,7 +46,8 @@ export function HeroMoonSection({
   const [toasts, setToasts] = useState([]);
 
   // 2026년 추석 당일 판별 (상수 CHUSEOK_OPEN_AT 활용)
-  const isChuseokPeriod = isDevChuseokDay || (Date.now() >= CHUSEOK_OPEN_AT);
+  const isChuseokPeriod =
+    (isAdmin && isDevChuseokDay) || Date.now() >= CHUSEOK_OPEN_AT;
 
   const displayOwnerName =
     userRole === 'owner' && currentUser?.nickname
@@ -205,8 +209,8 @@ export function HeroMoonSection({
 
         {/* 2026 Chuseok Real-time Countdown Timer */}
         <ChuseokCountdown
-          isDevChuseokDay={isDevChuseokDay}
-          onToggleDevChuseok={onToggleDevChuseok}
+          isDevChuseokDay={isAdmin && isDevChuseokDay}
+          onToggleDevChuseok={isAdmin ? onToggleDevChuseok : undefined}
         />
 
         {/* Progress Info Container */}
@@ -245,19 +249,17 @@ export function HeroMoonSection({
           </div>
 
           {/* View Verses Link */}
-          <div className="flex items-center justify-between pt-1">
-            <div className="inline-flex items-center gap-1 px-3 py-1 bg-[#FFF1C7] text-[#6B4AA6] border border-[#E8B7C8] rounded-full text-xs font-semibold">
-              <Clock className="w-3 h-3 text-[#6B4AA6]" />
-              <span>{isChuseokPeriod ? '추석 당일 오픈됨' : '추석 당일 00:00 공개'}</span>
-            </div>
+          <div className="flex items-center justify-end pt-1">
 
-            <button
-              onClick={onOpenViewVerses}
-              className="inline-flex items-center gap-1 text-xs font-bold text-[#6B4AA6] hover:text-[#53318C] hover:underline underline-offset-4"
-            >
-              <Layers className="w-3.5 h-3.5" />
-              <span>받은 말씀 열어보기 ({messagesCount})</span>
-            </button>
+            {canViewReceivedMessages && (
+              <button
+                onClick={onOpenViewVerses}
+                className="inline-flex items-center gap-1 text-xs font-bold text-[#6B4AA6] hover:text-[#53318C] hover:underline underline-offset-4"
+              >
+                <Layers className="w-3.5 h-3.5" />
+                <span>받은 말씀 열어보기 ({messagesCount})</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -374,11 +376,11 @@ export function HeroMoonSection({
         {/* Footer */}
         <footer className="w-full pt-4 pb-2 border-t border-[#E8B7C8]/40 text-center">
           <div className="flex items-center justify-center gap-4 text-xs font-medium text-[#565B86] mb-2">
-            <a href="#terms" onClick={(e) => e.preventDefault()} className="hover:text-[#3F315F]">이용약관</a>
+            <Link to="/terms" className="hover:text-[#3F315F]">이용약관</Link>
             <span>·</span>
-            <a href="#privacy" onClick={(e) => e.preventDefault()} className="hover:text-[#3F315F]">개인정보처리방침</a>
+            <Link to="/privacy" className="hover:text-[#3F315F]">개인정보처리방침</Link>
             <span>·</span>
-            <a href="#support" onClick={(e) => e.preventDefault()} className="hover:text-[#3F315F]">고객센터</a>
+            <Link to="/support" className="hover:text-[#3F315F]">고객센터</Link>
           </div>
           <p className="text-[11px] text-[#565B86]/70">
             © 2026 Dama. All rights reserved. 너를 생각하며 말씀을 담아

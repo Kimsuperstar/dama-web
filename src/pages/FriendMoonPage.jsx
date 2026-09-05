@@ -495,6 +495,7 @@ function FriendMoonPage() {
                     moonData={moon}
 
                     userRole="visitor"
+                    canViewReceivedMessages={false}
 
 
                     // 말씀 남기기 클릭
