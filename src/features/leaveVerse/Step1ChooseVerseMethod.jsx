@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { ChevronLeft, X, Search, Edit3, ArrowRight, Heart, Sparkles, BookOpen } from 'lucide-react';
+import { ChevronLeft, X, Search, Edit3, ArrowRight } from 'lucide-react';
 
 /**
  * 1단계 선택 화면: 말씀 선택 방법 고르기
@@ -8,7 +7,6 @@ import { ChevronLeft, X, Search, Edit3, ArrowRight, Heart, Sparkles, BookOpen } 
  * 2) 직접 입력하기 (성경 구절 및 본문 직접 작성)
  */
 export function Step1ChooseVerseMethod({
-  recipientName = '친구',
   onChooseBrowse,
   onChooseWrite,
   onBack,

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 
 export function NicknameModal({
@@ -14,9 +14,15 @@ export function NicknameModal({
   // 기존 닉네임이 있으면 입력창에 미리 보여주기
   useEffect(() => {
     if (isOpen) {
-      setNickname(currentNickname ?? '');
-      setError('');
+      const timeoutId = window.setTimeout(() => {
+        setNickname(currentNickname ?? '');
+        setError('');
+      }, 0);
+
+      return () => window.clearTimeout(timeoutId);
     }
+
+    return undefined;
   }, [isOpen, currentNickname]);
 
   if (!isOpen) {

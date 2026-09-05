@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { HeroMoonSection } from '../components/HeroMoonSection';
 import { Step1ChooseVerseMethod } from '../features/leaveVerse/Step1ChooseVerseMethod';
@@ -13,11 +13,10 @@ import { INITIAL_BIBLE_VERSES, INITIAL_MOCK_MESSAGES } from '../data/verses';
 import { API_BASE_URL } from '../config/api';
 
 /**
- * 특정 보름달 상세 및 말씀 남기기 인터랙션 페이지 (경로: /moon/:moonId)
+ * 특정 보름달의 상세 및 말씀 남기기 인터랙션 페이지 (경로: /moon/:moonId)
  */
 export function MoonPage({
   isLoggedIn = false,
-  authProvider = null,
   currentUser = null,
   isAdmin = false,
   isDevChuseokDay = false,
@@ -25,17 +24,15 @@ export function MoonPage({
   onOAuthLogin,
   onOpenLoginModal,
   onOpenNicknameModal,
-  onLogout,
   onSessionExpired,
   previewAsUser = false,
 }) {
   const { moonId } = useParams();
   const navigate = useNavigate();
 
-  // 보름달 데이터
   const [moonData, setMoonData] = useState(null);
 
- // =========================================================
+  // =========================================================
   // moonId가 변경되면 실제 Spring Boot에서 Moon 조회
   // =========================================================
   useEffect(() => {
@@ -46,7 +43,7 @@ export function MoonPage({
       if (moonId === 'demo') {
         setMoonData({
           id: 'demo',
-          ownerName: '소망',
+          ownerName: '김스타',
           targetCount: 15,
           messages: INITIAL_MOCK_MESSAGES,
           dDay: '추석까지 D-12',
@@ -56,7 +53,7 @@ export function MoonPage({
       }
 
 
-      // 개발용 Moon
+      // 개발자 Moon
       if (moonId === 'moon-developer') {
         setMoonData({
           id: 'moon-developer',
@@ -102,12 +99,6 @@ export function MoonPage({
           await response.json();
 
 
-        console.log(
-          '서버에서 조회한 Moon:',
-          moon
-        );
-
-
         // =====================================================
         // 2. 받은 말씀 목록 조회
         // =====================================================
@@ -139,14 +130,8 @@ export function MoonPage({
           await messagesResponse.json();
 
 
-        console.log(
-          '받은 말씀 목록:',
-          messages
-        );
-
-
         // =====================================================
-        // 3. 화면에 사용할 Moon 데이터 완성
+        // 3. 화면에서 사용할 Moon 데이터 구성
         // =====================================================
 
         setMoonData({
@@ -154,8 +139,7 @@ export function MoonPage({
 
           targetCount: 15,
 
-          // 실제 DB 데이터
-          messages: messages,
+          messages,
 
           dDay: '추석까지 D-12',
         });
@@ -189,7 +173,7 @@ export function MoonPage({
   const [isCreateMoonOpen, setIsCreateMoonOpen] = useState(false);
   const [isLocalLoginOpen, setIsLocalLoginOpen] = useState(false);
 
-  // 말씀 남기기 폼 상태
+  // 말씀 남기기 입력 상태
   const [selectedCategory, setSelectedCategory] = useState('응원');
   const [selectedVerse, setSelectedVerse] = useState(INITIAL_BIBLE_VERSES[0]);
   const [personalMessage, setPersonalMessage] = useState('');
@@ -226,7 +210,7 @@ export function MoonPage({
     setIsAnonymous(false);
   };
 
-  // 새 보름달 생성 요청 (로그인 필수)
+  // 내 보름달 생성 요청 (로그인 필수)
   const handleRequestCreateMoon = () => {
     if (!isLoggedIn) {
       if (onOpenLoginModal) {
@@ -239,7 +223,7 @@ export function MoonPage({
     }
   };
 
-  // 새 보름달 생성 완료 핸들러
+  // 보름달 생성 완료 핸들러
   const handleCreateMoon = (newMoon) => {
     setMoonData(newMoon);
     setUserRole('owner');
@@ -260,7 +244,6 @@ export function MoonPage({
       {leaveFlowStep === 'hero' && (
         <HeroMoonSection
           isLoggedIn={isLoggedIn}
-          authProvider={authProvider}
           currentUser={currentUser}
           moonData={moonData}
           userRole={userRole}
@@ -366,7 +349,6 @@ export function MoonPage({
         isOpen={isViewVersesOpen}
         onClose={() => setIsViewVersesOpen(false)}
         moonData={moonData}
-        isOwner={userRole === 'owner'}
         isAdmin={isAdmin}
         isDevChuseokDay={isDevChuseokDay}
         onToggleDevChuseok={isAdmin ? onToggleDevChuseok : undefined}

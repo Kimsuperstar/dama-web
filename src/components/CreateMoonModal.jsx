@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'motion/react';
-import { X, Moon, Sparkles, Check, ArrowRight, Heart } from 'lucide-react';
+import { X, Moon, Sparkles, Check, ArrowRight } from 'lucide-react';
 import { DamaLogo } from './DamaLogo';
 
 /**
@@ -179,4 +179,3 @@ import { DamaLogo } from './DamaLogo';
     </div>
   );
 }
-

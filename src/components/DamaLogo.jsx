@@ -1,4 +1,3 @@
-import React from 'react';
 
 /**
  * 담아(Dama) 공식 브랜드 로고 컴포넌트
@@ -217,4 +216,3 @@ export function DamaLogo({
     </div>
   );
 }
-

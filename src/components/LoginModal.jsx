@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'motion/react';
 import { X, Moon } from 'lucide-react';
 import { DamaLogo } from './DamaLogo';
@@ -15,10 +14,6 @@ export function LoginModal({
 
   const handleKakaoLogin = () => {
     onOAuthLogin('kakao');
-  };
-
-  const handleNaverLogin = () => {
-    onOAuthLogin('naver');
   };
 
   return (

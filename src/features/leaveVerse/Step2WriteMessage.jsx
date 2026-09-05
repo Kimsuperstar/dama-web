@@ -1,8 +1,5 @@
-import React, { useState } from 'react';
-import { motion } from 'motion/react';
 import { 
   ArrowRight, 
-  BookOpen, 
   Edit2, 
   Sparkles, 
   User, 
@@ -29,8 +26,6 @@ export function Step2WriteMessage({
   onBack,
   onEditVerse,
 }) {
-  const [activeTab, setActiveTab] = useState('direct'); // 'direct' | 'templates'
-
   const messageTemplates = [
     `${recipientName}아/야, 늘 기도하며 응원해! 올 한 해 하나님께서 네 걸음을 밝히 비춰주시길 바라.`,
     `풍성하고 따뜻한 한가위 보내! 주님의 평안과 위로가 늘 함께하길 기도해.`,

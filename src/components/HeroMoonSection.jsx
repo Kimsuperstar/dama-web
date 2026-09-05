@@ -1,25 +1,20 @@
-import React, { useState } from 'react';
+﻿import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { MoonVisual } from './MoonVisual';
 import { ChuseokCountdown } from './ChuseokCountdown';
-import { CHUSEOK_OPEN_AT } from '../constants/chuseok';
 import { PUBLIC_APP_URL } from '../config/api';
+import { useChuseokPeriod } from '../hooks/useChuseokPeriod';
 import {
   Share2,
-  Link2,
   BookOpen,
-  Clock,
   Heart,
   Gift,
   Mail,
   Pencil,
   Check,
-  Sparkles,
   ChevronRight,
   Layers,
-  UserCheck,
-  Users
 } from 'lucide-react';
 
 /**
@@ -27,11 +22,9 @@ import {
  */
 export function HeroMoonSection({
   isLoggedIn = false,
-  authProvider = null,
   currentUser = null,
   moonData,
   userRole = 'visitor',
-  onChangeUserRole,
   isAdmin = false,
   isDevChuseokDay = false,
   onToggleDevChuseok,
@@ -42,12 +35,11 @@ export function HeroMoonSection({
   onOpenNicknameModal,
   onBackToLanding,
 }) {
-  // 토스트 알림 스택 상태
+  // 토스트 알림 상태
   const [toasts, setToasts] = useState([]);
 
-  // 2026년 추석 당일 판별 (상수 CHUSEOK_OPEN_AT 활용)
   const isChuseokPeriod =
-    (isAdmin && isDevChuseokDay) || Date.now() >= CHUSEOK_OPEN_AT;
+    useChuseokPeriod(isAdmin && isDevChuseokDay);
 
   const displayOwnerName =
     userRole === 'owner' && currentUser?.nickname
@@ -58,7 +50,7 @@ export function HeroMoonSection({
   const targetCount = moonData?.targetCount || 15;
   const originalPercentage = Math.min(100, Math.round((messagesCount / targetCount) * 100));
 
-  // 추석 당일이 되면 아직 15개가 다 모이지 않았더라도 모든 보름달을 환한 만월(100%)로 표시
+  // 추석 기간에는 아직 15개가 다 모이지 않았더라도 만월로 표시
   const displayPercentage = isChuseokPeriod ? 100 : originalPercentage;
 
   // 토스트 추가 헬퍼
@@ -75,16 +67,12 @@ export function HeroMoonSection({
     }, 3200);
   };
 
-  console.log('HeroMoonSection moonData:', moonData);
-
-  // 친구들에게 내 보름달 공유하기 버튼 클릭 시
   const handleShareMoon = () => {
-    const moonId = moonData?.id || 'demo';
     const shareUrl = `${PUBLIC_APP_URL}/share/${moonData.shareToken}`;
     navigator.clipboard.writeText(shareUrl);
     triggerToast(
-      '보름달 링크가 복사됐어요!',
-      '친구에게 공유하면 바로 말씀을 남길 수 있어요.'
+      '보름달 링크가 복사되었어요',
+      '친구에게 공유하면 바로 말씀을 남길 수 있어요'
     );
   };
 
@@ -122,7 +110,7 @@ export function HeroMoonSection({
 
       {/* Main Canvas Card */}
       <div className="w-full max-w-[480px] px-4 pt-3 pb-12 flex flex-col items-center text-center">
-        {/* 뒤로가기 버튼 (비로그인 상태일 때 랜딩 홈으로 이동) */}
+        {/* 돌아가기 버튼 */}
         {!isLoggedIn && onBackToLanding && (
           <div className="w-full flex justify-start mb-2">
             <button
@@ -130,15 +118,15 @@ export function HeroMoonSection({
               onClick={onBackToLanding}
               className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold text-[#565B86] hover:text-[#3F315F] bg-white/70 hover:bg-white border border-[#E8B7C8]/70 transition-all shadow-2xs"
             >
-              <span>← 담아 소개 홈으로</span>
+              <span>담아 소개로</span>
             </button>
           </div>
         )}
 
         {/* Chuseok Festive Badge */}
         <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#FFF1C7] border border-[#E8B7C8] text-[#53318C] text-[11px] font-bold shadow-2xs mb-2">
-          <span>🌾</span>
-          <span>{isChuseokPeriod ? '보름달처럼 풍성한 한가위 되세요' : '2026 한가위 보름달 나눔'}</span>
+          <span>🌕</span>
+          <span>{isChuseokPeriod ? '보름달처럼 풍성한 한가위' : '2026 한가위 보름달 나눔'}</span>
           <span>🌕</span>
         </div>
 
@@ -178,18 +166,21 @@ export function HeroMoonSection({
           <p className="text-sm sm:text-base text-[#565B86] leading-relaxed break-keep font-medium">
             {isChuseokPeriod ? (
               <>
-                보름달처럼 풍성하고 은혜 넘치는 한가위 되세요 ✦<br />
-                {moonData?.ownerName || '소중한 분'}의 보름달이 온 세상을 환하게 비추고 있어요
+                보름달처럼 풍성하고 따뜻한 한가위를 보내세요.
+                <br />
+                {moonData?.ownerName || '소중한 분'}의 보름달이 환하게 빛나고 있어요.
               </>
             ) : userRole === 'owner' ? (
               <>
-                친구들이 남겨주는 따뜻한 말씀으로<br />
-                {moonData?.ownerName}의 보름달이 차오르고 있어요
+                친구들이 남겨주는 따뜻한 말씀으로
+                <br />
+                {moonData?.ownerName}의 보름달이 차오르고 있어요.
               </>
             ) : (
               <>
-                {moonData?.ownerName || '친구'}를 생각하며<br />
-                축복의 성경 말씀 한 구절을 선물해주세요
+                {moonData?.ownerName || '친구'}를 생각하며
+                <br />
+                축복의 성경 말씀 한 구절을 선물해주세요.
               </>
             )}
           </p>
@@ -202,7 +193,7 @@ export function HeroMoonSection({
           <div className="h-[1px] bg-[#E8B7C8]/50 flex-1" />
         </div>
 
-        {/* Visual Component: The Moon (추석 당일에는 만월 100%로 환하게 표시) */}
+        {/* Visual Component: The Moon */}
         <div className="my-2 relative flex flex-col items-center">
           <MoonVisual percentage={displayPercentage} size="lg" glow={true} />
         </div>
@@ -220,7 +211,7 @@ export function HeroMoonSection({
               <span className="text-lg">🌙</span>
               <span>
                 {isChuseokPeriod
-                  ? `보름달처럼 풍성한 한가위 되세요! 🌕`
+                  ? '보름달처럼 풍성한 한가위 되세요 🌕'
                   : messagesCount >= 15
                     ? `만월 완성! 총 ${messagesCount}개의 말씀이 모였어요 🌕`
                     : `받은 말씀 ${messagesCount}개 | 15개가 모이면 만월 완성 (${originalPercentage}%)`}
@@ -228,9 +219,9 @@ export function HeroMoonSection({
             </div>
             <span className="text-[11px] text-[#565B86] break-keep">
               {isChuseokPeriod
-                ? `추석을 맞이하여 온 세상을 환하게 비추는 만월이 되었습니다. (총 ${messagesCount}개의 축복 말씀)`
+                ? `추석을 맞이하여 늘 환하게 빛나는 만월이 되었어요. (총 ${messagesCount}개의 축복 말씀)`
                 : messagesCount >= 15
-                  ? '보름달이 가득 찼어요! 계속해서 축복의 말씀을 더해주실 수 있어요.'
+                  ? '보름달이 가득 차올랐어요. 계속해서 축복의 말씀을 더해주실 수 있어요.'
                   : '음력 8월 15일 보름달처럼 15개의 말씀으로 환한 달이 채워져요.'}
             </span>
           </div>
@@ -266,7 +257,7 @@ export function HeroMoonSection({
         {/* Primary Action Section */}
         <div className="w-full space-y-2.5 my-2">
           {userRole === 'owner' ? (
-            /* Owner View CTA: 깔끔한 단일 공유 버튼 */
+            /* Owner View CTA: 공유 버튼 */
             <div>
               <button
                 onClick={handleShareMoon}
@@ -290,7 +281,7 @@ export function HeroMoonSection({
 
         {/* Notice for Chuseok Opening */}
         <p className="text-[11px] sm:text-xs text-[#565B86] mt-1 mb-6">
-          * 친구들이 남긴 말씀은 추석 당일 00:00에 열어볼 수 있어요.
+          * 친구들이 남긴 말씀은 추석 당일 00:00에 열어볼 수 있어요
         </p>
 
         {/* 3 Step Service Explanation Section */}
@@ -346,7 +337,7 @@ export function HeroMoonSection({
           </div>
         </div>
 
-        {/* Guest Participation Banner (비로그인 상태일 때만 노출) */}
+        {/* Guest Participation Banner */}
         {!isLoggedIn && (
           <div className="w-full bg-gradient-to-b from-[#FFF1C7]/30 to-white/90 rounded-[28px] p-6 border border-[#E8B7C8] text-center dama-card-shadow mb-8">
             <div className="w-10 h-10 rounded-full bg-[#EADDFF] text-[#6B4AA6] mx-auto flex items-center justify-center mb-3">
@@ -355,7 +346,7 @@ export function HeroMoonSection({
 
             <h3 className="text-base sm:text-lg font-bold text-[#3F315F] mb-2 font-display">
               담아는 <span className="text-[#6B4AA6] underline decoration-[#E8B7C8] decoration-2 underline-offset-4">회원가입 없이</span><br />
-              누구나 말씀을 남길 수 있어요.
+              친구에게 말씀을 남길 수 있어요
             </h3>
 
             <p className="text-xs text-[#565B86] leading-relaxed max-w-xs mx-auto mb-4 break-keep">

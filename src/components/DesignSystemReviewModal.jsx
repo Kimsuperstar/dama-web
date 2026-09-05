@@ -1,6 +1,5 @@
-import React from 'react';
 import { motion } from 'motion/react';
-import { X, CheckCircle, AlertTriangle, Sparkles, Palette, Type, Layout, ShieldCheck } from 'lucide-react';
+import { X, CheckCircle, Palette, Type, ShieldCheck } from 'lucide-react';
 import { DamaLogo } from './DamaLogo';
 
 /**

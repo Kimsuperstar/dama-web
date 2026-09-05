@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 
 import {
     useParams, useNavigate,
@@ -25,10 +25,6 @@ import {
 import {
     Step3ConfirmSend,
 } from '../features/leaveVerse/Step3ConfirmSend';
-
-import {
-    ViewVersesModal,
-} from '../components/ViewVersesModal';
 
 import { HEART_CATEGORIES } from '../data/verses';
 import { API_BASE_URL } from '../config/api';
@@ -82,10 +78,6 @@ function FriendMoonPage() {
     // 말씀 보기 모달
     // =========================================================
 
-    const [isViewVersesOpen, setIsViewVersesOpen] =
-        useState(false);
-
-
     // =========================================================
     // 공유 토큰으로 Moon 조회
     // =========================================================
@@ -110,11 +102,6 @@ function FriendMoonPage() {
 
                 const data = await response.json();
 
-                console.log(
-                    '공유 보름달 조회:',
-                    data
-                );
-
 
                 // 받은 말씀 개수 조회
                 const countResponse = await fetch(
@@ -129,11 +116,6 @@ function FriendMoonPage() {
 
                 const messageCount =
                     await countResponse.json();
-
-                console.log(
-                    '받은 말씀 개수:',
-                    messageCount
-                );
 
 
                 setMoon({
@@ -195,11 +177,6 @@ function FriendMoonPage() {
                 const data =
                     await response.json();
 
-                console.log(
-                    '말씀 조회 성공:',
-                    data
-                );
-
                 setVerses(data);
 
                 // 처음 들어왔을 때 첫 번째 말씀 기본 선택
@@ -228,15 +205,14 @@ function FriendMoonPage() {
     const handleConfirmSend = async () => {
         try {
 
-            // 직접 입력했는지,
-            // 기존 말씀을 선택했는지 판단
+            // 직접 입력했는지, 기존 말씀을 선택했는지 판단
             const isManual =
                 selectedVerse?.source === 'manual';
 
 
             // =====================================================
-            // 화면용 한글 카테고리 → 서버용 Enum 값으로 변환
-            // 예: "응원" → "ENCOURAGE"
+            // 화면의 한글 카테고리를 서버 Enum 값으로 변환
+            // 예: "응원" -> "ENCOURAGE"
             // =====================================================
 
             const categoryItem =
@@ -253,17 +229,6 @@ function FriendMoonPage() {
 
             const categoryValue =
                 categoryItem.value;
-
-
-            console.log(
-                '선택한 카테고리:',
-                selectedCategory
-            );
-
-            console.log(
-                '서버로 전송할 카테고리:',
-                categoryValue
-            );
 
             const requestBody = {
 
@@ -303,17 +268,6 @@ function FriendMoonPage() {
             };
 
 
-            console.log(
-                '서버 전송 데이터:',
-                requestBody
-            );
-
-            console.log(
-                'verseId 타입:',
-                typeof requestBody.verseId
-            );
-
-
             // =====================================================
             // Spring Boot로 말씀 저장 요청
             // =====================================================
@@ -327,50 +281,7 @@ function FriendMoonPage() {
                         'Content-Type': 'application/json',
                     },
 
-                    body: JSON.stringify({
-
-                        sourceType:
-                            isManual
-                                ? 'MANUAL'
-                                : 'PROVIDED',
-
-                        // 기존 말씀 선택이면 id 전달
-                        // 직접 입력이면 null
-                        verseId:
-                            isManual
-                                ? null
-                                : selectedVerse?.id,
-
-
-                        // 중요!
-                        // "응원"이 아니라 "ENCOURAGE" 전송
-                        category:
-                            isManual
-                                ? categoryValue
-                                : null,
-
-
-                        // 직접 입력인 경우만 전달
-                        manualReference:
-                            isManual
-                                ? selectedVerse?.reference
-                                : null,
-
-                        manualText:
-                            isManual
-                                ? selectedVerse?.verse
-                                : null,
-
-                        personalMessage:
-                            personalMessage.trim(),
-
-                        authorName:
-                            authorName.trim()
-                            || '친구',
-
-                        isAnonymous:
-                            isAnonymous,
-                    }),
+                    body: JSON.stringify(requestBody),
                 }
             );
 
@@ -386,13 +297,7 @@ function FriendMoonPage() {
                 await response.json();
 
 
-            console.log(
-                'DB에 저장된 말씀:',
-                savedMessage
-            );
-
-
-            // DB 저장 성공한 뒤 화면에도 추가
+            // DB 저장 성공 후 화면의 개수도 증가
             setMoon((prev) => ({
                 ...prev,
 
@@ -401,7 +306,7 @@ function FriendMoonPage() {
             }));
 
 
-            // Step3에게 "저장 성공"을 알려주기 위해 반환
+            // Step3에게 저장 성공 결과를 돌려주기 위해 반환
             return savedMessage;
 
 
@@ -412,8 +317,7 @@ function FriendMoonPage() {
                 error
             );
 
-            // 중요:
-            // Step3에서도 실패 사실을 알 수 있게 다시 던짐
+            // Step3에서 실패 사실을 알 수 있게 다시 던짐
             throw error;
         }
     };
@@ -488,8 +392,6 @@ function FriendMoonPage() {
 
                     isLoggedIn={false}
 
-                    authProvider={null}
-
                     currentUser={null}
 
                     moonData={moon}
@@ -501,12 +403,6 @@ function FriendMoonPage() {
                     // 말씀 남기기 클릭
                     onOpenLeaveVerse={() =>
                         setLeaveFlowStep('chooseMethod')
-                    }
-
-
-                    // 받은 말씀 보기
-                    onOpenViewVerses={() =>
-                        setIsViewVersesOpen(true)
                     }
 
 
@@ -782,21 +678,6 @@ function FriendMoonPage() {
             {/* ============================================= */}
             {/* 받은 말씀 보기 모달 */}
             {/* ============================================= */}
-
-            <ViewVersesModal
-
-                isOpen={isViewVersesOpen}
-
-                onClose={() =>
-                    setIsViewVersesOpen(false)
-                }
-
-                moonData={moon}
-
-                isOwner={false}
-
-            />
-
 
         </div>
     );

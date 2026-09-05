@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { useState, useMemo } from 'react';
+import { motion } from 'motion/react';
 import { HEART_CATEGORIES } from '../../data/verses';
 import { RefreshCw, Search, ArrowRight, Check, X, BookOpen, ChevronLeft } from 'lucide-react';
 
@@ -41,7 +41,6 @@ export function Step1SelectVerse({
   onSelectVerse,
   onNext,
   onBack,
-  recipientName = '친구',
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTestament, setSelectedTestament] = useState('전체');

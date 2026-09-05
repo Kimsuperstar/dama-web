@@ -1,16 +1,13 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { useState } from 'react';
+import { motion } from 'motion/react';
 import { MoonVisual } from '../../components/MoonVisual';
 import { 
   Check, 
-  Share2, 
   Moon, 
   Sparkles, 
   ChevronLeft, 
   X, 
-  Heart, 
   Lock,
-  ArrowRight,
   Gift
 } from 'lucide-react';
 
@@ -38,6 +35,7 @@ export function Step3ConfirmSend({
   // 말씀 담기 버튼 클릭 시 애니메이션 연출 후 완료 상태로 전환
   const handleSend = async () => {
     try {
+      setIsSubmitting(true);
       await onConfirmSend();
 
       // DB 저장 성공한 경우에만
@@ -47,6 +45,8 @@ export function Step3ConfirmSend({
         '말씀 전송 실패:',
         error
       );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

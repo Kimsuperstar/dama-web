@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import { useState, useEffect, useCallback } from 'react';
 import {
   BrowserRouter,
   Routes,
@@ -33,7 +33,6 @@ function AppContent() {
   // =========================================================
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [authProvider, setAuthProvider] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
 
   // 처음 사용자 정보를 확인하기 전까지의 상태
@@ -57,7 +56,7 @@ function AppContent() {
     useState(false);
 
   // =========================================================
-  // React ↔ Spring Boot 연결 확인
+  // React / Spring Boot 연결 확인
   // =========================================================
 
   useEffect(() => {
@@ -71,9 +70,7 @@ function AppContent() {
 
         return response.json();
       })
-      .then((data) => {
-        console.log('Spring Boot 연결 성공:', data);
-      })
+      .then(() => {})
       .catch((error) => {
         console.error('Spring Boot 연결 실패:', error);
       });
@@ -91,7 +88,7 @@ function AppContent() {
           {
             method: 'GET',
 
-            // Spring Security 세션 쿠키를 함께 전송
+            // Spring Security 세션 쿠키를 포함해 전송
             credentials: 'include',
           }
         );
@@ -99,7 +96,6 @@ function AppContent() {
         // 로그인하지 않은 사용자
         if (response.status === 401) {
           setIsLoggedIn(false);
-          setAuthProvider(null);
           setCurrentUser(null);
           return;
         }
@@ -112,16 +108,12 @@ function AppContent() {
 
         const user = await response.json();
 
-        console.log('현재 로그인 사용자:', user);
-
         setCurrentUser(user);
         setIsLoggedIn(true);
-        setAuthProvider(user.provider?.toLowerCase() ?? null);
       } catch (error) {
         console.error('로그인 상태 확인 실패:', error);
 
         setIsLoggedIn(false);
-        setAuthProvider(null);
         setCurrentUser(null);
       } finally {
         setIsAuthLoading(false);
@@ -159,18 +151,14 @@ useEffect(() => {
 
         const user = await userResponse.json();
 
-        // 2. 로그인 상태 저장
+        // 로그인 상태 저장
         setCurrentUser(user);
         setIsLoggedIn(true);
-
-        setAuthProvider(
-          user.provider?.toLowerCase() ?? null
-        );
 
         setIsLoginModalOpen(false);
 
 
-        // 3. 이 사용자의 2026년 보름달이 있는지 조회
+        // 2. 이 사용자의 2026년 보름달이 있는지 조회
         const moonResponse = await fetch(
           `${API_BASE_URL}/api/v1/moons/me?seasonYear=2026`,
           {
@@ -179,15 +167,10 @@ useEffect(() => {
         );
 
 
-        // 4. 기존 Moon이 있으면
+        // 기존 Moon이 있으면 이동
         if (moonResponse.ok) {
 
           const moon = await moonResponse.json();
-
-          console.log(
-            '기존 보름달 있음:',
-            moon
-          );
 
           // 생성 모달은 열지 않음
           setIsCreateMoonModalOpen(false);
@@ -201,12 +184,8 @@ useEffect(() => {
         }
 
 
-        // 5. Moon이 없으면 404
+        // 보름달이 없으면 404
         if (moonResponse.status === 404) {
-
-          console.log(
-            '기존 보름달 없음 → 생성 모달 열기'
-          );
 
           setIsCreateMoonModalOpen(true);
 
@@ -219,7 +198,7 @@ useEffect(() => {
         }
 
 
-        // 404 이외의 실패
+        // 404 이외는 실패
         throw new Error(
           `내 보름달 조회 실패: ${moonResponse.status}`
         );
@@ -300,7 +279,6 @@ useEffect(() => {
       }
 
       setIsLoggedIn(false);
-      setAuthProvider(null);
       setCurrentUser(null);
 
       navigate('/');
@@ -315,7 +293,6 @@ useEffect(() => {
 
   const handleSessionExpired = useCallback(() => {
     setIsLoggedIn(false);
-    setAuthProvider(null);
     setCurrentUser(null);
 
     setIsLoginModalOpen(true);
@@ -379,9 +356,13 @@ useEffect(() => {
       return;
     }
 
-    navigateToMyMoonOrCreate({
-      replace: true,
-    });
+    const timeoutId = window.setTimeout(() => {
+      navigateToMyMoonOrCreate({
+        replace: true,
+      });
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, [
     isAuthLoading,
     isLoggedIn,
@@ -392,9 +373,15 @@ useEffect(() => {
 
   useEffect(() => {
     if (!realIsAdmin) {
-      setAdminViewMode('admin');
-      setIsDevChuseokDay(false);
+      const timeoutId = window.setTimeout(() => {
+        setAdminViewMode('admin');
+        setIsDevChuseokDay(false);
+      }, 0);
+
+      return () => window.clearTimeout(timeoutId);
     }
+
+    return undefined;
   }, [realIsAdmin]);
 
   const handleToggleAdminViewMode = () => {
@@ -452,16 +439,13 @@ useEffect(() => {
 
     const user = await response.json();
 
-    console.log('닉네임 변경 완료:', user);
-
-    // 여기 중요
     // 서버에서 받은 최신 User로 로그인 사용자 갱신
     setCurrentUser(user);
 
     return user;
   };
   // =========================================================
-  // 새 보름달 생성 요청
+  // 내 보름달 생성 요청
   // =========================================================
 
   const handleRequestCreateMoon = () => {
@@ -504,8 +488,6 @@ useEffect(() => {
       }
 
       const moon = await response.json();
-
-      console.log('보름달 생성 완료:', moon);
 
       setIsCreateMoonModalOpen(false);
 
@@ -582,7 +564,6 @@ useEffect(() => {
       {/* Header */}
       <Header
         isLoggedIn={isLoggedIn}
-        authProvider={authProvider}
         currentUser={currentUser}
         isAdmin={isAdmin}
         realIsAdmin={realIsAdmin}
@@ -595,7 +576,6 @@ useEffect(() => {
           setIsLoginModalOpen(true)
         }
         onLogout={handleLogout}
-        onOpenCreateMoon={handleRequestCreateMoon}
         onOpenDesignReview={() =>
           setIsDesignReviewOpen(true)
         }
@@ -618,7 +598,6 @@ useEffect(() => {
             element={
               <MoonPage
                 isLoggedIn={isLoggedIn}
-                authProvider={authProvider}
                 currentUser={currentUser}
                 onSessionExpired={handleSessionExpired}
                 isAdmin={isAdmin}

@@ -1,46 +1,33 @@
-import React from 'react';
-import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { MoonVisual } from '../components/MoonVisual';
 import { ChuseokCountdown } from '../components/ChuseokCountdown';
-import { CHUSEOK_OPEN_AT } from '../constants/chuseok';
-import { 
-  Sparkles, 
-  Moon, 
-  Heart, 
-  BookOpen, 
-  Gift, 
-  Share2, 
-  Lock, 
-  ChevronRight,
-  CheckCircle2,
+import { useChuseokPeriod } from '../hooks/useChuseokPeriod';
+import {
+  Sparkles,
+  Moon,
+  Lock,
   Users,
-  ShieldCheck
 } from 'lucide-react';
 
 /**
  * 담아(Dama) 비로그인 메인 랜딩 페이지 화면 (경로: /)
  */
 export function LandingPage({
-  onOpenLogin,
   onOpenCreateMoon,
   onExploreDemoMoon,
   isDevChuseokDay = false,
   onToggleDevChuseok,
 }) {
-  // 2026년 추석 당일 판별 (상수 CHUSEOK_OPEN_AT 활용)
-  const isChuseokPeriod = isDevChuseokDay || (Date.now() >= CHUSEOK_OPEN_AT);
+  const isChuseokPeriod = useChuseokPeriod(isDevChuseokDay);
 
   return (
     <div className="w-full max-w-[540px] px-4 pt-4 pb-16 flex flex-col items-center text-center">
-      {/* 2026 Festive Season Badge */}
       <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#FFF1C7] border border-[#E8B7C8] text-[#53318C] text-xs font-bold shadow-2xs mb-3">
-        <span>🌾</span>
-        <span>2026 한가위 성경 말씀 나눔을 담아</span>
+        <span>🌕</span>
+        <span>2026 한가위 성경 말씀 나눔, 담아</span>
         <span>🌕</span>
       </div>
 
-      {/* Main Slogan & Headline */}
       <div className="mb-4">
         <h1 className="font-display text-3xl sm:text-4xl font-extrabold text-[#3F315F] tracking-tight leading-tight mb-2 break-keep">
           보름달에<br />
@@ -50,21 +37,22 @@ export function LandingPage({
           </span>
         </h1>
         <p className="text-sm sm:text-base text-[#565B86] leading-relaxed break-keep font-medium max-w-md mx-auto">
-          소중한 사람에게 축복의 성경 말씀과 따뜻한 마음을 선물하고,<br></br> 추석 00:00에 나만의 보름달을 함께 열어보세요.
+          소중한 사람에게 축복의 성경 말씀과 따뜻한 마음을 선물하고,<br />
+          추석 00:00에 환한 보름달을 함께 열어보세요.
         </p>
       </div>
 
-      {/* Moon Visual Preview */}
       <div className="my-3 relative flex flex-col items-center">
-        <MoonVisual percentage={isChuseokPeriod ? 100 : 75} size="lg" glow={true} />
+        <MoonVisual percentage={isChuseokPeriod ? 100 : 75} size="lg" glow />
       </div>
 
-      {/* Countdown or Feast Status */}
       <div className="mb-6 w-full max-w-[440px]">
-        <ChuseokCountdown isDevChuseokDay={isDevChuseokDay} onToggleDevChuseok={onToggleDevChuseok} />
+        <ChuseokCountdown
+          isDevChuseokDay={isDevChuseokDay}
+          onToggleDevChuseok={onToggleDevChuseok}
+        />
       </div>
 
-      {/* Primary Action Buttons */}
       <div className="w-full max-w-[440px] space-y-3 mb-8">
         <button
           type="button"
@@ -85,14 +73,12 @@ export function LandingPage({
         </button>
       </div>
 
-      {/* Feature Highlights Grid */}
       <div className="w-full max-w-[440px] bg-white/80 rounded-[24px] p-5 border border-[#E8B7C8]/70 text-left dama-card-shadow mb-8 space-y-3">
         <h3 className="font-bold text-[#3F315F] text-sm sm:text-base flex items-center gap-2 mb-2">
           <Sparkles className="w-4 h-4 text-[#6B4AA6]" />
           <span>담아(Dama)는 이렇게 함께해요</span>
         </h3>
 
-        {/* Highlight 1 */}
         <div className="flex items-start gap-2.5">
           <div className="w-7 h-7 rounded-full bg-[#EADDFF] text-[#6B4AA6] flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
             <Users className="w-3.5 h-3.5" />
@@ -107,7 +93,6 @@ export function LandingPage({
           </div>
         </div>
 
-        {/* Highlight 2 */}
         <div className="flex items-start gap-2.5">
           <div className="w-7 h-7 rounded-full bg-[#FFF1C7] text-[#53318C] flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
             <Moon className="w-3.5 h-3.5 fill-[#53318C]" />
@@ -122,7 +107,6 @@ export function LandingPage({
           </div>
         </div>
 
-        {/* Highlight 3 */}
         <div className="flex items-start gap-2.5">
           <div className="w-7 h-7 rounded-full bg-[#EADDFF] text-[#BA1A1A] flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
             <Lock className="w-3.5 h-3.5" />
@@ -132,13 +116,12 @@ export function LandingPage({
               추석 당일 00:00에 열리는 감동
             </div>
             <p className="text-xs text-[#565B86] leading-relaxed">
-              도착한 말씀은 추석 당일 보관함이 열리며 소중한 선물처럼 확인할 수 있어요.
+              감춰진 말씀은 추석 당일 보관함이 열리면 소중한 선물처럼 확인할 수 있어요.
             </p>
           </div>
         </div>
       </div>
 
-      {/* Footer */}
       <footer className="w-full pt-6 pb-2 border-t border-[#E8B7C8]/40 text-center mt-4">
         <div className="flex items-center justify-center gap-4 text-xs font-medium text-[#565B86] mb-2">
           <Link to="/terms" className="hover:text-[#3F315F]">이용약관</Link>

@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { X, Lock, Sparkles, BookOpen, Clock, Heart, AlertCircle, Moon, ShieldAlert } from 'lucide-react';
+import { useState } from 'react';
+import { motion } from 'motion/react';
+import { X, Lock, Sparkles, BookOpen } from 'lucide-react';
 import { HEART_CATEGORIES } from '../data/verses';
-import { CHUSEOK_OPEN_AT } from '../constants/chuseok';
+import { useChuseokPeriod } from '../hooks/useChuseokPeriod';
 
 /**
  * 받은 말씀 목록 및 추석 오픈 보관함 모달
@@ -12,12 +12,13 @@ export function ViewVersesModal({
   isOpen,
   onClose,
   moonData,
-  isOwner = true,
   isAdmin = false,
   isDevChuseokDay = false,
   onToggleDevChuseok,
 }) {
   const [activeCategory, setActiveCategory] = useState('전체');
+
+  const isActuallyUnlocked = useChuseokPeriod(isAdmin && isDevChuseokDay);
 
   if (!isOpen) return null;
 
@@ -25,9 +26,6 @@ export function ViewVersesModal({
   const filteredMessages = activeCategory === '전체'
     ? messages
     : messages.filter((m) => m.category === activeCategory);
-
-  const isChuseokPassed = Date.now() >= CHUSEOK_OPEN_AT;
-  const isActuallyUnlocked = isChuseokPassed || (isAdmin && isDevChuseokDay);
 
   const getCategoryName = (categoryValue) => {
     const category = HEART_CATEGORIES.find(

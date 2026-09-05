@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'motion/react';
-import { ChevronLeft, X, ArrowRight, BookOpen, Sparkles, Heart } from 'lucide-react';
+import { ChevronLeft, X, ArrowRight, BookOpen } from 'lucide-react';
 import { HEART_CATEGORIES } from '../../data/verses';
 
 /**
