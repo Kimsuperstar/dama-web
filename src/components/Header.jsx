@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { DamaLogo } from './DamaLogo';
-import { Sparkles, ShieldCheck, UserRound } from 'lucide-react';
+import {
+  Check,
+  Eye,
+  Sparkles,
+  ShieldCheck,
+  UserRound,
+} from 'lucide-react';
 
-/**
- * 상단 글로벌 헤더 컴포넌트
- */
 export function Header({
   isLoggedIn = false,
-  authProvider = null,
   currentUser = null,
   isAdmin = false,
   realIsAdmin = false,
@@ -18,103 +20,151 @@ export function Header({
   onToggleDevChuseok,
   onOpenLogin,
   onLogout,
-  onOpenCreateMoon,
   onOpenDesignReview,
   onGoHome,
 }) {
-  // 랜딩페이지이거나 카카오/네이버 일반 로그인인 경우 개발/피드백 도구 숨김 (개발자 로그인 상태일 때만 표시)
+  const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false);
+  const adminMenuRef = useRef(null);
+
   const showDevTools =
     isLoggedIn &&
     (isAdmin || currentUser?.role === 'ADMIN') &&
     currentView !== 'landing';
 
+  const showAdminMenu =
+    realIsAdmin &&
+    currentView !== 'landing' &&
+    (onToggleAdminViewMode || onToggleDevChuseok || onOpenDesignReview);
+
+  useEffect(() => {
+    if (!isAdminMenuOpen) {
+      return undefined;
+    }
+
+    const handlePointerDown = (event) => {
+      if (
+        adminMenuRef.current &&
+        !adminMenuRef.current.contains(event.target)
+      ) {
+        setIsAdminMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown);
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+    };
+  }, [isAdminMenuOpen]);
+
+  const handleAdminMenuAction = (action) => {
+    action?.();
+    setIsAdminMenuOpen(false);
+  };
+
   return (
     <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-[#FFF8EE]/90 border-b border-[#E8B7C8]/40 transition-colors">
       <div className="max-w-[800px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-        {/* Brand Logo */}
-        <DamaLogo 
-          variant="primary" 
-          color="#3F315F" 
+        <DamaLogo
+          variant="primary"
+          color="#3F315F"
           onClick={onGoHome}
           className="cursor-pointer"
         />
 
-        {/* Right Actions */}
         <div className="flex items-center gap-1.5 sm:gap-2">
-          {/* 개발자 추석 당일 테스트 버튼 (개발자 로그인 시에만 노출) */}
-          {showDevTools && (
-            <button
-              type="button"
-              onClick={onToggleDevChuseok}
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all ${
-                isDevChuseokDay
-                  ? 'bg-[#BA1A1A] text-white shadow-xs animate-pulse ring-2 ring-[#BA1A1A]/30'
-                  : 'bg-white text-[#6B4AA6] border border-[#6B4AA6]/40 hover:bg-[#EADDFF]/50'
-              }`}
-              title="클릭하여 2026년 추석 당일(00:00 오픈) 상태를 시연합니다"
-            >
-              <span>{isDevChuseokDay ? '🌕' : '🧪'}</span>
-              <span className="hidden sm:inline">
-                {isDevChuseokDay ? '추석 당일 모드 ON' : '추석 당일 시연'}
-              </span>
-              <span className="sm:hidden">
-                {isDevChuseokDay ? '추석ON' : '추석시연'}
-              </span>
-            </button>
-          )}
+          {showAdminMenu && (
+            <div ref={adminMenuRef} className="relative">
+              <button
+                type="button"
+                onClick={() => setIsAdminMenuOpen((prev) => !prev)}
+                className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all shadow-xs ${
+                  adminViewMode === 'user'
+                    ? 'bg-white text-[#6B4AA6] border-[#6B4AA6]/45 ring-2 ring-[#EADDFF]'
+                    : isDevChuseokDay
+                      ? 'bg-[#BA1A1A] text-white border-[#BA1A1A] ring-2 ring-[#BA1A1A]/20'
+                      : 'bg-white/80 text-[#53318C] border-[#E8B7C8]/80 hover:bg-[#FFF1C7]/60'
+                }`}
+                aria-label="관리자 메뉴 열기"
+                aria-expanded={isAdminMenuOpen}
+                title="관리자 메뉴"
+              >
+                <ShieldCheck className="w-4 h-4" />
+              </button>
 
-          {/* Design System & Critique Inspector Button (개발자 로그인 시에만 노출) */}
-          {showDevTools && (
-            <button
-              onClick={onOpenDesignReview}
-              className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium text-[#53318C] bg-[#FFF1C7] border border-[#E8B7C8] hover:bg-[#FFEAA7] transition-all"
-              title="디자인 시스템 및 보완점 분석 보기"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-[#6B4AA6]" />
-              <span className="hidden md:inline">디자인 피드백</span>
-              <span className="md:hidden">피드백</span>
-            </button>
-          )}
+              {isAdminMenuOpen && (
+                <div className="absolute right-0 top-10 w-56 rounded-2xl border border-[#E8B7C8] bg-white/95 backdrop-blur-md p-2 text-left shadow-xl z-50">
+                  <div className="px-3 py-2 border-b border-[#E8B7C8]/50 mb-1">
+                    <p className="text-xs font-bold text-[#3F315F]">
+                      관리자 메뉴
+                    </p>
+                    <p className="text-[11px] font-medium text-[#8C7A9C] mt-0.5">
+                      현재 {adminViewMode === 'admin' ? '관리자 모드' : '사용자 모드'}
+                    </p>
+                  </div>
 
-          {/* Login / Logout Button */}
-          {realIsAdmin && onToggleAdminViewMode && (
-            <button
-              type="button"
-              onClick={onToggleAdminViewMode}
-              className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-xs sm:text-sm font-bold border transition-all shadow-xs ${
-                adminViewMode === 'admin'
-                  ? 'bg-[#3F315F] text-white border-[#3F315F] hover:bg-[#53318C]'
-                  : 'bg-white text-[#6B4AA6] border-[#6B4AA6]/40 hover:bg-[#EADDFF]/50'
-              }`}
-              title={
-                adminViewMode === 'admin'
-                  ? '일반 사용자 화면으로 확인'
-                  : '관리자 화면으로 돌아가기'
-              }
-            >
-              {adminViewMode === 'admin' ? (
-                <UserRound className="w-3.5 h-3.5" />
-              ) : (
-                <ShieldCheck className="w-3.5 h-3.5" />
+                  {onToggleAdminViewMode && (
+                    <button
+                      type="button"
+                      onClick={() => handleAdminMenuAction(onToggleAdminViewMode)}
+                      className="w-full flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-[#3F315F] hover:bg-[#FFF1C7]/60 transition-colors"
+                    >
+                      {adminViewMode === 'admin' ? (
+                        <UserRound className="w-4 h-4 text-[#6B4AA6]" />
+                      ) : (
+                        <ShieldCheck className="w-4 h-4 text-[#6B4AA6]" />
+                      )}
+                      <span>
+                        {adminViewMode === 'admin'
+                          ? '사용자 모드로 보기'
+                          : '관리자 모드로 돌아가기'}
+                      </span>
+                    </button>
+                  )}
+
+                  {showDevTools && onToggleDevChuseok && (
+                    <button
+                      type="button"
+                      onClick={() => handleAdminMenuAction(onToggleDevChuseok)}
+                      className="w-full flex items-center justify-between gap-2 rounded-xl px-3 py-2 text-xs font-bold text-[#3F315F] hover:bg-[#FFF1C7]/60 transition-colors"
+                    >
+                      <span className="inline-flex items-center gap-2">
+                        <Eye className="w-4 h-4 text-[#6B4AA6]" />
+                        <span>추석 당일 미리보기</span>
+                      </span>
+                      {isDevChuseokDay && (
+                        <Check className="w-4 h-4 text-[#BA1A1A]" />
+                      )}
+                    </button>
+                  )}
+
+                  {showDevTools && onOpenDesignReview && (
+                    <button
+                      type="button"
+                      onClick={() => handleAdminMenuAction(onOpenDesignReview)}
+                      className="w-full flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-[#3F315F] hover:bg-[#FFF1C7]/60 transition-colors"
+                    >
+                      <Sparkles className="w-4 h-4 text-[#6B4AA6]" />
+                      <span>디자인 피드백 보기</span>
+                    </button>
+                  )}
+                </div>
               )}
-              <span className="hidden sm:inline">
-                {adminViewMode === 'admin' ? '사용자 모드' : '관리자 모드'}
-              </span>
-            </button>
+            </div>
           )}
 
-          {/* Login / Logout Button */}
           {isLoggedIn ? (
             <button
               type="button"
               onClick={onLogout}
               className="px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium text-[#8C7A9C] hover:text-[#BA1A1A] hover:bg-[#FFF1C7]/60 border border-[#E8B7C8]/70 bg-white/70 transition-all shadow-2xs"
-              title="로그아웃하여 방문자 시점으로 돌아가기"
+              title="로그아웃"
             >
               로그아웃
             </button>
           ) : (
             <button
+              type="button"
               onClick={onOpenLogin}
               className="px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium text-[#3F315F] bg-white/80 border border-[#6B4AA6]/30 hover:border-[#6B4AA6] hover:bg-white transition-all shadow-xs"
             >

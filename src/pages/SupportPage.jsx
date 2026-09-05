@@ -81,7 +81,7 @@ export function SupportPage({ onBack }) {
             고객센터
           </h1>
           <p className="text-xs sm:text-sm text-[#565B86] mt-2">
-            담아를 사용하며 궁금한 점을 남겨주세요.
+            담아를 사용하며 궁금한 점이나 피드백을 남겨주세요.
           </p>
         </div>
 
