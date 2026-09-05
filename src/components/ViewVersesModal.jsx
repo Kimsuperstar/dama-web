@@ -104,7 +104,7 @@ export function ViewVersesModal({
               <p className="text-[11px] text-[#565B86]">
                 {isActuallyUnlocked
                   ? '소중한 분들이 마음을 담아 전한 축복과 성경 말씀을 확인하세요.'
-                  : '추석 전까지 말씀 구절, 개인 메시지, 보낸 사람은 모두 비밀로 보관돼요.'}
+                  : '추석 전까지 말씀 구절, 메시지, 보낸 사람은 모두 비밀로 보관돼요.'}
               </p>
             </div>
           </div>
@@ -218,10 +218,7 @@ export function ViewVersesModal({
                         <Lock className="w-4 h-4" />
                       </div>
                       <p className="font-serif-kr text-xs sm:text-[13px] font-bold text-[#3F315F] mb-1">
-                        &ldquo;추석날 보름달과 함께 공개될 성경 말씀입니다&rdquo;
-                      </p>
-                      <p className="text-[11px] text-[#8C7A9C]">
-                        추석 당일(00:00)에 말씀과 보낸 사람이 공개돼요 ✦
+                        &ldquo;추석 보름달이 뜨면, 친구들이 남긴 말씀을 볼 수 있어요&rdquo;
                       </p>
                     </div>
                   ) : (

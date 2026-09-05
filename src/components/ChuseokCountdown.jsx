@@ -61,12 +61,6 @@ export function ChuseokCountdown({ isDevChuseokDay = false }) {
 
   return (
     <div className="w-full bg-gradient-to-b from-[#FFF1C7]/45 via-white/95 to-[#FFF8EE] rounded-[24px] p-4 sm:p-5 border border-[#E8B7C8] dama-card-shadow relative overflow-hidden text-center mb-4">
-      <div className="absolute -top-3 -right-3 text-3xl opacity-20 pointer-events-none select-none">
-        🧧
-      </div>
-      <div className="absolute -bottom-3 -left-3 text-2xl opacity-15 pointer-events-none select-none">
-        🌕
-      </div>
 
       <div className="flex items-center justify-between gap-2 mb-2.5">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#6B4AA6] text-white rounded-full text-[11px] font-bold shadow-2xs">
@@ -86,7 +80,7 @@ export function ChuseokCountdown({ isDevChuseokDay = false }) {
             <span>🌕 보름달처럼 풍성한 한가위 되세요 🌕</span>
           </div>
           <p className="text-xs text-[#565B86] mt-1 font-medium break-keep">
-            2026 한가위 추석 당일! 소중한 분들이 마음에 담아 전한 축복과 성경 말씀이 모두 열렸습니다.
+            소중한 분들이 마음에 담아 전한 축복과 성경 말씀이 모두 열렸습니다.
           </p>
         </div>
       ) : (
@@ -122,7 +116,7 @@ export function ChuseokCountdown({ isDevChuseokDay = false }) {
           </div>
 
           <p className="text-[11px] text-[#565B86] mt-1.5 font-medium">
-            ✦ 추석 당일 00:00에 비밀 말씀이 공개됩니다 ✦
+            ✦ 추석 당일 00:00에 말씀이 공개됩니다 ✦
           </p>
         </div>
       )}

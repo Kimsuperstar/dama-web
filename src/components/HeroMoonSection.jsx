@@ -279,13 +279,8 @@ export function HeroMoonSection({
           )}
         </div>
 
-        {/* Notice for Chuseok Opening */}
-        <p className="text-[11px] sm:text-xs text-[#565B86] mt-1 mb-6">
-          * 친구들이 남긴 말씀은 추석 당일 00:00에 열어볼 수 있어요
-        </p>
-
         {/* 3 Step Service Explanation Section */}
-        <div className="w-full bg-white/95 rounded-[28px] p-5 sm:p-6 border border-[#E8B7C8] dama-card-shadow mb-6 text-left">
+        <div className="w-full mt-5 bg-white/95 rounded-[28px] p-5 sm:p-6 border border-[#E8B7C8] dama-card-shadow mb-6 text-left">
           <h2 className="text-base sm:text-lg font-bold text-[#3F315F] text-center mb-5 font-display">
             말씀 남기기, 이렇게 진행돼요
           </h2>
