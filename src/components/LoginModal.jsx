@@ -85,7 +85,7 @@ export function LoginModal({
           </button>
 
           {/* 네이버 */}
-          <button
+          {/* <button
             type="button"
             onClick={handleNaverLogin}
             className="w-full h-12 bg-[#03C75A] hover:brightness-95 active:scale-[0.99] text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 shadow-xs transition-all"
@@ -104,12 +104,12 @@ export function LoginModal({
             </svg>
 
             <span>네이버로 시작하기</span>
-          </button>
+          </button> */}
         </div>
 
         <div className="mt-6 pt-4 border-t border-[#E8B7C8]/40">
           <p className="text-[11px] text-[#565B86]/80 leading-relaxed break-keep">
-            * 보름달을 선물하고 말씀을 남기는 친구들은{' '}
+            * 보름달을 선물하고 말씀을 남기는 친구들은{' '}<br></br>
             <strong>회원가입 없이 누구나</strong> 바로 작성할 수 있습니다.
           </p>
         </div>

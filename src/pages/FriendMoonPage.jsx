@@ -30,8 +30,6 @@ import {
     ViewVersesModal,
 } from '../components/ViewVersesModal';
 
-import { INITIAL_BIBLE_VERSES, } from '../data/verses';
-
 import { HEART_CATEGORIES } from '../data/verses';
 import { API_BASE_URL } from '../config/api';
 
@@ -66,8 +64,9 @@ function FriendMoonPage() {
     const [selectedCategory, setSelectedCategory] =
         useState('응원');
 
-    const [selectedVerse, setSelectedVerse] =
-        useState(INITIAL_BIBLE_VERSES[0]);
+    const [verses, setVerses] = useState([]);
+
+    const [selectedVerse, setSelectedVerse] = useState(null);
 
     const [personalMessage, setPersonalMessage] =
         useState('');
@@ -172,6 +171,55 @@ function FriendMoonPage() {
 
     }, [shareToken]);
 
+    // =========================================================
+    // 말씀 목록 조회
+    // =========================================================
+
+    useEffect(() => {
+
+        const fetchVerses = async () => {
+
+            try {
+
+                const response = await fetch(
+                    `${API_BASE_URL}/api/v1/verses`
+                );
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        `말씀 조회 실패: HTTP ${response.status}`
+                    );
+                }
+
+                const data =
+                    await response.json();
+
+                console.log(
+                    '말씀 조회 성공:',
+                    data
+                );
+
+                setVerses(data);
+
+                // 처음 들어왔을 때 첫 번째 말씀 기본 선택
+                if (data.length > 0) {
+                    setSelectedVerse(data[0]);
+                }
+
+            } catch (error) {
+
+                console.error(
+                    '말씀 조회 실패:',
+                    error
+                );
+            }
+        };
+
+        fetchVerses();
+
+    }, []);
+
 
     // =========================================================
     // 말씀 전송 완료
@@ -217,6 +265,54 @@ function FriendMoonPage() {
                 categoryValue
             );
 
+            const requestBody = {
+
+                sourceType:
+                    isManual
+                        ? 'MANUAL'
+                        : 'PROVIDED',
+
+                verseId:
+                    isManual
+                        ? null
+                        : selectedVerse?.id,
+
+                category:
+                    isManual
+                        ? categoryValue
+                        : null,
+
+                manualReference:
+                    isManual
+                        ? selectedVerse?.reference
+                        : null,
+
+                manualText:
+                    isManual
+                        ? selectedVerse?.verse
+                        : null,
+
+                personalMessage:
+                    personalMessage.trim(),
+
+                authorName:
+                    authorName.trim() || '친구',
+
+                isAnonymous:
+                    isAnonymous,
+            };
+
+
+            console.log(
+                '서버 전송 데이터:',
+                requestBody
+            );
+
+            console.log(
+                'verseId 타입:',
+                typeof requestBody.verseId
+            );
+
 
             // =====================================================
             // Spring Boot로 말씀 저장 요청
@@ -236,7 +332,7 @@ function FriendMoonPage() {
                         sourceType:
                             isManual
                                 ? 'MANUAL'
-                                : 'VERSE',
+                                : 'PROVIDED',
 
                         // 기존 말씀 선택이면 id 전달
                         // 직접 입력이면 null
@@ -249,7 +345,9 @@ function FriendMoonPage() {
                         // 중요!
                         // "응원"이 아니라 "ENCOURAGE" 전송
                         category:
-                            categoryValue,
+                            isManual
+                                ? categoryValue
+                                : null,
 
 
                         // 직접 입력인 경우만 전달
@@ -332,7 +430,7 @@ function FriendMoonPage() {
         setSelectedCategory('응원');
 
         setSelectedVerse(
-            INITIAL_BIBLE_VERSES[0]
+            verses[0] ?? null
         );
 
         setPersonalMessage('');
@@ -464,6 +562,7 @@ function FriendMoonPage() {
 
                     recipientName={moon.ownerName}
 
+                    verses={verses}
                     selectedCategory={selectedCategory}
 
                     onSelectCategory={

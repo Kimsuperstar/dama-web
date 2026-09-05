@@ -1,12 +1,40 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { HEART_CATEGORIES, INITIAL_BIBLE_VERSES } from '../../data/verses';
+import { HEART_CATEGORIES } from '../../data/verses';
 import { RefreshCw, Search, ArrowRight, Check, X, BookOpen, ChevronLeft } from 'lucide-react';
+
+const CATEGORY_MAP = {
+  응원: 'ENCOURAGE',
+  축복: 'BLESSING',
+  위로: 'COMFORT',
+  감사: 'THANKS',
+  사랑: 'LOVE',
+  평안: 'PEACE',
+  새출발: 'NEW_START',
+  믿음: 'FAITH',
+};
+
+const CATEGORY_REVERSE_MAP = {
+  ENCOURAGE: '응원',
+  BLESSING: '축복',
+  COMFORT: '위로',
+  THANKS: '감사',
+  LOVE: '사랑',
+  PEACE: '평안',
+  NEW_START: '새출발',
+  FAITH: '믿음',
+};
+
+const TESTAMENT_MAP = {
+  구약: 'OLD',
+  신약: 'NEW',
+};
 
 /**
  * 1단계 (말씀 찾아보기): 성경 말씀 검색창 + 감정 카테고리 선택 + 추천 말씀 카드
  */
 export function Step1SelectVerse({
+  verses = [],
   selectedCategory = '응원',
   onSelectCategory,
   selectedVerse,
@@ -20,8 +48,15 @@ export function Step1SelectVerse({
 
   // 현재 선택된 감정 카테고리에 속한 성경 구절 목록
   const categoryVerses = useMemo(() => {
-    return INITIAL_BIBLE_VERSES.filter((v) => v.category === selectedCategory);
-  }, [selectedCategory]);
+
+    const categoryValue =
+      CATEGORY_MAP[selectedCategory] ?? selectedCategory;
+
+    return verses.filter(
+      (v) => v.category === categoryValue
+    );
+
+  }, [verses, selectedCategory]);
 
   // 다른 말씀 보기 (순환)
   const handleNextInSameCategory = () => {
@@ -40,22 +75,34 @@ export function Step1SelectVerse({
   const searchResults = useMemo(() => {
     if (!searchQuery.trim()) return [];
     const query = searchQuery.trim().toLowerCase();
-    return INITIAL_BIBLE_VERSES.filter((v) => {
-      const matchTestament = selectedTestament === '전체' || v.testament === selectedTestament;
+
+    return verses.filter((v) => {
+      const testamentValue =
+        TESTAMENT_MAP[selectedTestament] ?? selectedTestament;
+
+      const matchTestament =
+        selectedTestament === '전체' ||
+        v.testament === testamentValue;
       const matchQuery =
         v.reference.toLowerCase().includes(query) ||
         v.verse.toLowerCase().includes(query) ||
         v.category.toLowerCase().includes(query);
       return matchTestament && matchQuery;
     });
-  }, [searchQuery, selectedTestament]);
+  }, [verses, searchQuery, selectedTestament]);
 
   const handleSelectFromSearch = (v) => {
+
     onSelectVerse({
       ...v,
       source: 'provided',
     });
-    onSelectCategory(v.category);
+
+    const categoryName =
+      CATEGORY_REVERSE_MAP[v.category] ?? v.category;
+
+    onSelectCategory(categoryName);
+
     setSearchQuery('');
   };
 
@@ -134,11 +181,10 @@ export function Step1SelectVerse({
                       key={t}
                       type="button"
                       onClick={() => setSelectedTestament(t)}
-                      className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${
-                        selectedTestament === t
-                          ? 'bg-[#6B4AA6] text-white'
-                          : 'bg-[#FFF8EE] text-[#565B86]'
-                      }`}
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${selectedTestament === t
+                        ? 'bg-[#6B4AA6] text-white'
+                        : 'bg-[#FFF8EE] text-[#565B86]'
+                        }`}
                     >
                       {t}
                     </button>
@@ -193,8 +239,17 @@ export function Step1SelectVerse({
                   key={cat.id}
                   type="button"
                   onClick={() => {
+
                     onSelectCategory(cat.id);
-                    const matched = INITIAL_BIBLE_VERSES.filter((v) => v.category === cat.id);
+
+                    const categoryValue =
+                      CATEGORY_MAP[cat.id] ?? cat.id;
+
+                    const matched =
+                      verses.filter(
+                        (v) => v.category === categoryValue
+                      );
+
                     if (matched.length > 0) {
                       onSelectVerse({
                         ...matched[0],
@@ -202,11 +257,10 @@ export function Step1SelectVerse({
                       });
                     }
                   }}
-                  className={`flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 ${
-                    isSelected
-                      ? 'bg-[#EADDFF] border-2 border-[#6B4AA6] text-[#3F315F] shadow-xs scale-[1.02]'
-                      : 'bg-white/90 border border-[#E8B7C8]/80 text-[#3F315F] hover:border-[#6B4AA6]/50 hover:bg-[#FFF1C7]/30'
-                  }`}
+                  className={`flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 ${isSelected
+                    ? 'bg-[#EADDFF] border-2 border-[#6B4AA6] text-[#3F315F] shadow-xs scale-[1.02]'
+                    : 'bg-white/90 border border-[#E8B7C8]/80 text-[#3F315F] hover:border-[#6B4AA6]/50 hover:bg-[#FFF1C7]/30'
+                    }`}
                 >
                   <span className="text-sm sm:text-base">{cat.emoji}</span>
                   <span>{cat.name}</span>
