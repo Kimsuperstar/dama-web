@@ -77,6 +77,14 @@ jobs:
           name: dama-frontend
           path: dist
 
+      - name: Show GitHub OIDC information
+        run: |
+          echo "Repository: ${{ github.repository }}"
+          echo "Owner: ${{ github.repository_owner }}"
+          echo "Owner ID: ${{ github.repository_owner_id }}"
+          echo "Repository ID: ${{ github.repository_id }}"
+          echo "Ref: ${{ github.ref }}"
+
       # GitHub OIDC → AWS IAM Role
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v5
