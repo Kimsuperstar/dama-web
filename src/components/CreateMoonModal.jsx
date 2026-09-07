@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'motion/react';
 import { X, Moon, Sparkles, Check, ArrowRight } from 'lucide-react';
 import { DamaLogo } from './DamaLogo';
+import { createUserMoonShareMessage } from '../utils/shareMessages';
 
 /**
   * 나만의 보름달 생성 모달
@@ -39,7 +40,7 @@ import { DamaLogo } from './DamaLogo';
 
   const handleCopy = () => {
     if (createdUrl) {
-      navigator.clipboard.writeText(createdUrl);
+      navigator.clipboard.writeText(createUserMoonShareMessage(createdUrl));
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }

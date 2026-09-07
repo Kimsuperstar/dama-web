@@ -5,6 +5,7 @@ import { MoonVisual } from './MoonVisual';
 import { ChuseokCountdown } from './ChuseokCountdown';
 import { PUBLIC_APP_URL } from '../config/api';
 import { useChuseokPeriod } from '../hooks/useChuseokPeriod';
+import { createUserMoonShareMessage } from '../utils/shareMessages';
 import {
   Share2,
   BookOpen,
@@ -69,10 +70,10 @@ export function HeroMoonSection({
 
   const handleShareMoon = () => {
     const shareUrl = `${PUBLIC_APP_URL}/share/${moonData.shareToken}`;
-    navigator.clipboard.writeText(shareUrl);
+    navigator.clipboard.writeText(createUserMoonShareMessage(shareUrl));
     triggerToast(
-      '보름달 링크가 복사되었어요',
-      '친구에게 공유하면 바로 말씀을 남길 수 있어요'
+      '공유 문구가 복사되었어요',
+      '친구에게 바로 붙여넣어 보낼 수 있어요'
     );
   };
 
