@@ -1,0 +1,97 @@
+name: Frontend CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+
+  # ==========================================
+  # CI
+  # ==========================================
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # GitHub 저장소 코드 가져오기
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Node.js 설치
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      # package-lock.json 기준 의존성 설치
+      - name: Install dependencies
+        run: npm ci
+
+      # React + Vite 빌드
+      - name: Build React
+        env:
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+        run: npm run build
+
+      # dist가 만들어졌는지 확인
+      - name: Check build output
+        run: ls -lah dist
+
+      # build job → deploy job으로 dist 전달
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dama-frontend
+          path: dist/
+          retention-days: 1
+
+
+  # ==========================================
+  # CD
+  # ==========================================
+  deploy:
+    needs: build
+
+    # PR에서는 배포하지 않고
+    # main에 push 됐을 때만 실제 AWS 배포
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    runs-on: ubuntu-latest
+
+    # GitHub OIDC로 AWS Role을 사용하기 위해 필요
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      # CI가 만든 dist 가져오기
+      - name: Download dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dama-frontend
+          path: dist
+
+      # GitHub OIDC → AWS IAM Role
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      # dist 안의 React 파일을 S3로 업로드
+      - name: Deploy to S3
+        run: |
+          aws s3 sync dist/ s3://${{ vars.S3_BUCKET }}/ --delete
+
+      # CloudFront의 기존 캐시 삭제
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/*"
