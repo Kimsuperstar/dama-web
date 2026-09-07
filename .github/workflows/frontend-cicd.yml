@@ -37,6 +37,7 @@ jobs:
       - name: Build React
         env:
           VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+          VITE_PUBLIC_APP_URL: ${{ vars.VITE_PUBLIC_APP_URL }}
         run: npm run build
 
       # dist가 만들어졌는지 확인
