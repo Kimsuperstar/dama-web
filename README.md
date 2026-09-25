@@ -26,12 +26,12 @@ Dama는 추석 전에 소중한 사람에게 마음을 담은 메시지를 남�
 
 ## 🖥 주요 화면
 
-<img src="./docs/images/landing.jpg" width="800" />
+<img src="./docs/images/landing.JPG" width="800" />
 
-<img src="./docs/images/moon.jpg" width="800" />
+<img src="./docs/images/moon.JPG" width="800" />
 
-<img src="./docs/images/write-message1.jpg" width="800" />
-<img src="./docs/images/write-message2.jpg" width="800" />
+<img src="./docs/images/write-message1.JPG" width="800" />
+<img src="./docs/images/write-message2.JPG" width="800" />
 
 <img src="./docs/images/message-complete.png" width="400" />
 
