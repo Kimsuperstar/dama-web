@@ -29,8 +29,8 @@ Dama는 추석 전에 소중한 사람에게 마음을 담은 메시지를 남�
 ### Landing & Moon
 
 <p align="center">
-  <img src="./docs/images/landing.jpg" width="280" />
-  <img src="./docs/images/moon.jpg" width="280" />
+  <img src="./docs/images/landing.JPG" width="280" />
+  <img src="./docs/images/moon.JPG" width="280" />
 </p>
 
 **Landing**  
@@ -48,8 +48,8 @@ Dama는 추석 전에 소중한 사람에게 마음을 담은 메시지를 남�
 ### Leave Message
 
 <p align="center">
-  <img src="./docs/images/write-message1.jpg" width="280" />
-  <img src="./docs/images/write-message2.jpg" width="280" />
+  <img src="./docs/images/write-message1.JPG" width="280" />
+  <img src="./docs/images/write-message2.JPG" width="280" />
 </p>
 
 공유받은 보름달에서 말씀을 선택하거나 직접 작성하고,  
