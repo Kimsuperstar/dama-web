@@ -26,18 +26,20 @@ Dama는 추석 전에 소중한 사람에게 마음을 담은 메시지를 남�
 
 ## 🖥 주요 화면
 
-<img src="./docs/images/landing.JPG" width="400" />
-<img src="./docs/images/moon.JPG" width="400" />
-<img src="./docs/images/write-message1.JPG" width="400" />
-<img src="./docs/images/write-message2.JPG" width="400" />
-<img src="./docs/images/message-complete.png" width="400" />
-### Landing
+### Landing & Moon
 
+<p align="center">
+  <img src="./docs/images/landing.jpg" width="280" />
+  <img src="./docs/images/moon.jpg" width="280" />
+</p>
+
+**Landing**  
 서비스 소개와 추석까지 남은 시간을 확인할 수 있습니다.
 
-### Moon
-
+**Moon**  
 사용자가 생성한 보름달과 현재까지 담긴 메시지를 확인할 수 있습니다.
+
+<br>
 
 ### Share Moon
 
@@ -45,11 +47,24 @@ Dama는 추석 전에 소중한 사람에게 마음을 담은 메시지를 남�
 
 ### Leave Message
 
-말씀을 선택하거나 직접 작성한 뒤 개인 메시지를 함께 담을 수 있습니다.
+<p align="center">
+  <img src="./docs/images/write-message1.jpg" width="280" />
+  <img src="./docs/images/write-message2.jpg" width="280" />
+</p>
+
+공유받은 보름달에서 말씀을 선택하거나 직접 작성하고,  
+전달하고 싶은 메시지를 함께 남길 수 있습니다.
+
+<br>
+
 
 ### Confirm Message
 
-작성한 말씀과 메시지를 최종 확인한 뒤 보름달에 전송할 수 있습니다.
+<p align="center">
+  <img src="./docs/images/message-complete.png" width="280" />
+</p>
+
+작성한 말씀과 메시지를 추석 당일에 확인할 수 있습니다.
 
 <br>
 
